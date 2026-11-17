@@ -1,7 +1,12 @@
 import { DUBLIN_CORE_FIELDS, PROJECT_INFO } from '../data/constants';
-import { FamilyArchiveProfile, FamilyArtifact } from '../types/artifact';
+import {
+  FamilyArchiveProfile,
+  FamilyArtifact,
+  ReferenceSourceRegistryItem,
+} from '../types/artifact';
 import {
   evaluateArtifactCompleteness,
+  isArtifactPubliclyVisible,
   sanitizeArtifactForPublic,
 } from './completeness';
 
@@ -29,31 +34,22 @@ export function exportArtifactsToJson(
 
   const exportRecords = includePrivateManagerData
     ? realOnly
-    : realOnly
-        .filter((a) => a.permissionStatus === 'Đã được phép' && !a.isDraft)
-        .map(sanitizeArtifactForPublic);
+    : realOnly.filter(isArtifactPubliclyVisible).map(sanitizeArtifactForPublic);
 
   const payload = {
-    schema: 'C03-HoSoKyVatGiaDinh-v1',
+    schema: 'C03-HoSoKyVatGiaDinh-v2',
     exportedAt: new Date().toISOString(),
     exportMode: includePrivateManagerData
       ? 'QUAN_LY_SAO_LUU_NOI_BO'
-      : 'CONG_KHAI_DUOC_PHEP',
+      : 'CONG_KHAI_CHUAN_NGUON',
     project: {
       code: PROJECT_INFO.projectCode,
       name: PROJECT_INFO.appName,
+      proposedTheme: PROJECT_INFO.proposedThemeName,
       student: PROJECT_INFO.studentName,
       studentId: PROJECT_INFO.studentId,
     },
-    familyProfile: includePrivateManagerData
-      ? profile
-      : {
-          familyName: profile.familyName || 'Chưa cập nhật',
-          artifactCollectionTheme: profile.artifactCollectionTheme || 'Chưa cập nhật',
-          verifiedStorageLocation: profile.verifiedStorageLocation || 'Chưa cập nhật',
-          authorizingPerson: profile.authorizingPerson || 'Chưa cập nhật',
-          allowedScope: profile.allowedScope || 'Chưa cập nhật',
-        },
+    familyProfile: profile,
     recordCount: exportRecords.length,
     artifacts: exportRecords,
   };
@@ -81,9 +77,7 @@ export function exportArtifactsToCsv(
   const realOnly = artifacts.filter((a) => !a.isDemo);
   const rowsData = includePrivateManagerData
     ? realOnly
-    : realOnly
-        .filter((a) => a.permissionStatus === 'Đã được phép' && !a.isDraft)
-        .map(sanitizeArtifactForPublic);
+    : realOnly.filter(isArtifactPubliclyVisible).map(sanitizeArtifactForPublic);
 
   const dcKeys = DUBLIN_CORE_FIELDS.map((f) => f.key);
   const extraKeys: Array<keyof FamilyArtifact> = [
@@ -142,7 +136,6 @@ export function exportArtifactsToCsv(
     csvLines.push(values.join(','));
   }
 
-  // UTF-8 BOM so Microsoft Excel renders Vietnamese diacritics properly
   const bom = '\uFEFF';
   const filename = `C03-HoSoKyVatGiaDinh-${todayIsoDate()}.csv`;
   const blob = new Blob([bom + csvLines.join('\r\n')], {
@@ -152,10 +145,26 @@ export function exportArtifactsToCsv(
   return { count: rowsData.length, filename };
 }
 
+export function exportSourcesList(sources: ReferenceSourceRegistryItem[]): string {
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    projectCode: PROJECT_INFO.projectCode,
+    totalSources: sources.length,
+    officialSources: sources.filter((s) => s.isOfficial).length,
+    sources,
+  };
+  const filename = `C03-DanhSachNguon-${todayIsoDate()}.json`;
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {
+    type: 'application/json;charset=utf-8',
+  });
+  triggerDownload(blob, filename);
+  return filename;
+}
+
 export function exportMissingFieldsReport(artifacts: FamilyArtifact[]): string {
   const realOnly = artifacts.filter((a) => !a.isDemo);
   const lines: string[] = [
-    'BÁO CÁO CÁC HỒ SƠ CÒN THIẾU TRƯỜNG THÔNG TIN — DỰ ÁN C03',
+    'DANH SÁCH HỒ SƠ CHƯA ĐỦ ĐIỀU KIỆN / THIẾU TRƯỜNG THÔNG TIN — DỰ ÁN C03',
     `Ngày xuất: ${new Date().toLocaleString('vi-VN')}`,
     `Tổng số hồ sơ thực tế kiểm tra: ${realOnly.length}`,
     '------------------------------------------------------------',
@@ -163,18 +172,24 @@ export function exportMissingFieldsReport(artifacts: FamilyArtifact[]): string {
 
   for (const item of realOnly) {
     const report = evaluateArtifactCompleteness(item);
+    const eligible =
+      report.isDublinCoreComplete &&
+      report.hasSufficientSources &&
+      report.hasPermission &&
+      item.imageFiles.some((i) => i.isPermittedForPublic);
+
     lines.push(
-      `[${item.identifier}] ${item.title || '(Chưa có tên)'} — Hoàn thiện: ${report.percentage}% (DC: ${report.dublinCoreFilled}/15)`
+      `[${item.identifier}] ${item.title || '(Chưa có tên)'} — Trạng thái: ${
+        eligible ? 'ĐỦ ĐIỀU KIỆN' : 'CHƯA ĐỦ ĐIỀU KIỆN'
+      } (${report.percentage}%, DC: ${report.dublinCoreFilled}/15, Quyền: ${item.permissionStatus})`
     );
-    if (report.missingFields.length === 0) {
-      lines.push('  ✓ Đã điền đủ các trường bắt buộc.');
-    } else {
-      lines.push(`  • Thiếu: ${report.missingFields.join(', ')}`);
+    if (report.missingFields.length > 0) {
+      lines.push(`  • Cần bổ sung / xác minh: ${report.missingFields.join(', ')}`);
     }
     lines.push('');
   }
 
-  const filename = `C03-BaoCaoThieuTruong-${todayIsoDate()}.txt`;
+  const filename = `C03-HoSoChuaDuDieuKien-${todayIsoDate()}.txt`;
   const blob = new Blob(['\uFEFF' + lines.join('\r\n')], {
     type: 'text/plain;charset=utf-8;',
   });
@@ -217,7 +232,7 @@ export function exportStatsReport(
 
   const filename = `C03-BaoCaoThongKe-${todayIsoDate()}.json`;
   const blob = new Blob([JSON.stringify(report, null, 2)], {
-    type: 'application/json;charset=utf-8;',
+    type: 'application/json;charset=utf-8',
   });
   triggerDownload(blob, filename);
   return filename;
@@ -317,7 +332,7 @@ export function validateImportedJson(
       currentStorageLocation: raw.currentStorageLocation ?? '',
       historicalStorageLocation: raw.historicalStorageLocation ?? '',
       displayedCopyType: raw.displayedCopyType ?? 'Bản số của gốc',
-      originalCondition: raw.originalCondition ?? 'Không rõ',
+      originalCondition: raw.originalCondition ?? 'Không rõ – nguồn chưa công bố tình trạng',
       registrationNumber: raw.registrationNumber ?? raw.identifier,
       permissionGrantedBy: raw.permissionGrantedBy ?? '',
       permissionRole: raw.permissionRole ?? '',

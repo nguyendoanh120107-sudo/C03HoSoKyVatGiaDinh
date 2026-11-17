@@ -9,6 +9,7 @@ import {
 import { motion } from 'motion/react';
 import { useArchive } from '../context/ArchiveContext';
 import { GeminiActionType, requestGeminiAssist } from '../services/geminiService';
+import { isArtifactPubliclyVisible } from '../utils/completeness';
 
 const ACTION_OPTIONS: Array<{
   id: GeminiActionType;
@@ -55,17 +56,17 @@ const ACTION_OPTIONS: Array<{
 ];
 
 const EXAMPLE_PROMPTS = [
-  'Gia đình có những kỷ vật nào liên quan đến thời kỳ trước năm 1990?',
-  'Hãy kể câu chuyện về chiếc đồng hồ đã được nhập trong hồ sơ.',
-  'Những kỷ vật nào đang bị hư hại?',
-  'Thông tin của kỷ vật C03-00001 còn thiếu gì?',
+  'Những hiện vật nào của gia đình đồng chí Ngô Gia Tự đang được lưu giữ tại Bảo tàng Bắc Ninh?',
+  'Hãy tóm tắt thông tin và nguồn của Sổ mua lương thực C03-00006.',
+  'Những hồ sơ nào còn thiếu kích thước hoặc chưa công bố tình trạng bản gốc?',
+  'C03-00010 và C03-00011 có nguồn xác minh từ đâu?',
 ];
 
 export const GeminiAssistantPage: React.FC = () => {
   const { activeViewArtifacts, geminiHealth, upsertArtifact } = useArchive();
 
   const permittedArtifacts = useMemo(
-    () => activeViewArtifacts.filter((a) => a.permissionStatus === 'Đã được phép'),
+    () => activeViewArtifacts.filter(isArtifactPubliclyVisible),
     [activeViewArtifacts]
   );
 
@@ -87,7 +88,7 @@ export const GeminiAssistantPage: React.FC = () => {
 
     if (permittedArtifacts.length === 0) {
       setError(
-        'Hiện chưa có hồ sơ nào ở trạng thái “Đã được phép”. Vì quy tắc bảo mật gia đình, hệ thống không gửi dữ liệu chưa được cấp quyền hoặc ảnh riêng tư cho Gemini.'
+        'Hiện chưa có hồ sơ công khai nào hợp lệ để truy vấn. Hệ thống chỉ gửi siêu dữ liệu đã xác minh hoặc hồ sơ đã được cấp quyền.'
       );
       return;
     }
@@ -160,7 +161,7 @@ export const GeminiAssistantPage: React.FC = () => {
           TRỢ LÝ KÝ ỨC GIA ĐÌNH
         </h1>
         <p className="text-sm text-[#65564A] max-w-3xl">
-          Hỗ trợ tra cứu bộ sưu tập, tóm tắt câu chuyện, đề xuất thuyết minh và gợi ý thông tin còn thiếu dựa hoàn toàn trên các hồ sơ đã được phép công bố.
+          Hỗ trợ tra cứu bộ sưu tập, tóm tắt câu chuyện, đề xuất thuyết minh và gợi ý thông tin còn thiếu dựa hoàn toàn trên các hồ sơ đã xác minh hoặc được phép công bố.
         </p>
       </div>
 
@@ -200,7 +201,7 @@ export const GeminiAssistantPage: React.FC = () => {
             <span>Ngữ cảnh được phép gửi Gemini: {permittedArtifacts.length} hồ sơ</span>
           </p>
           <p className="text-xs leading-relaxed">
-            Không gửi ảnh, số điện thoại, nội dung hạn chế hoặc hồ sơ chưa cấp quyền. AI bị ràng buộc không bịa đặt niên đại/lịch sử ngoài tư liệu đã nhập.
+            Chỉ gửi siêu dữ liệu đã xác minh công khai; tuyệt đối không gửi ảnh chưa cấp phép, nội dung hạn chế, bản nháp hoặc hồ sơ đã thu hồi quyền. AI bị ràng buộc trích dẫn rõ Mã hiện vật, Nơi lưu giữ, Loại bản hiển thị và Nguồn.
           </p>
         </div>
       </div>

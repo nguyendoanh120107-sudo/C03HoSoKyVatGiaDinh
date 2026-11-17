@@ -6,6 +6,9 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import packagedArtifactsJson from '../data/artifacts.json';
+import packagedPermissionsJson from '../data/permissions.json';
+import packagedSourcesJson from '../data/sources.json';
 import {
   DEFAULT_FAMILY_PROFILE,
   DEMO_ARTIFACTS,
@@ -26,6 +29,7 @@ import { checkGeminiHealth, GeminiHealthStatus } from '../services/geminiService
 import {
   FamilyArchiveProfile,
   FamilyArtifact,
+  PermissionRegistryEntry,
   ReferenceSourceRegistryItem,
 } from '../types/artifact';
 import { evaluateArtifactCompleteness } from '../utils/completeness';
@@ -38,6 +42,7 @@ interface ArchiveContextValue {
   activeViewArtifacts: FamilyArtifact[];
   familyProfile: FamilyArchiveProfile;
   sources: ReferenceSourceRegistryItem[];
+  permissions: PermissionRegistryEntry[];
   isDemoMode: boolean;
   setIsDemoMode: (val: boolean) => void;
   isPublicPreview: boolean;
@@ -45,11 +50,20 @@ interface ArchiveContextValue {
   geminiHealth: GeminiHealthStatus | null;
   realStats: {
     totalReal: number;
+    verifiedCount: number;
     permittedCount: number;
     dublinCoreCompleteCount: number;
     totalRealImages: number;
     permittedRealImages: number;
     needConservationCount: number;
+    sufficientSourcesCount: number;
+  };
+  sourceStats: {
+    totalSources: number;
+    officialSources: number;
+    directArtifactSources: number;
+    unverifiedSources: number;
+    artifactsWithTwoSources: number;
   };
   refreshAll: () => Promise<void>;
   upsertArtifact: (artifact: FamilyArtifact) => Promise<void>;
@@ -71,6 +85,7 @@ export const ArchiveProvider: React.FC<{ children: React.ReactNode }> = ({
   const [familyProfile, setFamilyProfile] =
     useState<FamilyArchiveProfile>(DEFAULT_FAMILY_PROFILE);
   const [sources, setSources] = useState<ReferenceSourceRegistryItem[]>([]);
+  const [permissions, setPermissions] = useState<PermissionRegistryEntry[]>([]);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [isPublicPreview, setIsPublicPreview] = useState(false);
   const [geminiHealth, setGeminiHealth] = useState<GeminiHealthStatus | null>(null);
@@ -80,19 +95,81 @@ export const ArchiveProvider: React.FC<{ children: React.ReactNode }> = ({
     setError(null);
     try {
       await initDatabase();
-      const [loadedArtifacts, loadedProfile, loadedSources] = await Promise.all([
+
+      // Load public packaged records from Express backend (fallback to bundled JSON)
+      let publicArtifacts: FamilyArtifact[] = (
+        packagedArtifactsJson as FamilyArtifact[]
+      ).map((a) => ({ ...a, isPackagedPublic: true }));
+      let publicSources: ReferenceSourceRegistryItem[] =
+        packagedSourcesJson as ReferenceSourceRegistryItem[];
+      let publicPermissions: PermissionRegistryEntry[] =
+        packagedPermissionsJson as PermissionRegistryEntry[];
+
+      try {
+        const res = await fetch('/api/public/bundle');
+        if (res.ok) {
+          const bundle = await res.json();
+          if (Array.isArray(bundle.artifacts)) {
+            publicArtifacts = bundle.artifacts.map((a: FamilyArtifact) => ({
+              ...a,
+              isPackagedPublic: true,
+            }));
+          }
+          if (Array.isArray(bundle.sources)) {
+            publicSources = bundle.sources;
+          }
+          if (Array.isArray(bundle.permissions)) {
+            publicPermissions = bundle.permissions;
+          }
+        }
+      } catch {
+        // Offline or static fallback already initialized
+      }
+
+      const [localArtifacts, loadedProfile, localSources] = await Promise.all([
         getAllArtifacts(),
         getFamilyProfile(),
         getAllSources(),
       ]);
-      setRealArtifacts(loadedArtifacts);
+
+      // Merge packaged public records with local IndexedDB edits/drafts (local takes precedence by ID)
+      const mergedMap = new Map<string, FamilyArtifact>();
+      for (const pub of publicArtifacts) {
+        mergedMap.set(pub.id, pub);
+      }
+      for (const loc of localArtifacts) {
+        mergedMap.set(loc.id, loc);
+      }
+
+      const mergedArtifacts = Array.from(mergedMap.values()).sort((a, b) =>
+        a.identifier.localeCompare(b.identifier)
+      );
+
+      // Merge packaged sources with local IndexedDB sources
+      const srcMap = new Map<string, ReferenceSourceRegistryItem>();
+      for (const s of publicSources) {
+        srcMap.set(s.id, s);
+      }
+      for (const ls of localSources) {
+        srcMap.set(ls.id, {
+          ...ls,
+          sourceCategory: ls.sourceCategory ?? 'C',
+          publisher: ls.publisher ?? ls.authorOrProvider ?? 'Chưa cập nhật',
+          publishedDate: ls.publishedDate ?? '',
+          accessedDate: ls.accessedDate ?? ls.surveyDate ?? '',
+          isVerified: ls.isVerified ?? Boolean(ls.url && ls.verifiedContent),
+        });
+      }
+
+      setRealArtifacts(mergedArtifacts);
       setFamilyProfile(loadedProfile);
-      setSources(loadedSources);
+      setSources(Array.from(srcMap.values()));
+      setPermissions(publicPermissions);
     } catch (err: unknown) {
       setError(
         err instanceof Error
           ? err.message
-          : 'Không thể tải dữ liệu từ bộ nhớ cục bộ IndexedDB.'
+          : 'Không thể tải dữ liệu hồ sơ.'
       );
     } finally {
       setIsLoading(false);
@@ -150,26 +227,45 @@ export const ArchiveProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const getNextCode = useCallback(async () => {
-    return peekNextIdentifier();
-  }, []);
+    const used = new Set(realArtifacts.map((a) => a.identifier));
+    let nextCode = await peekNextIdentifier();
+    let num = parseInt(nextCode.replace('C03-', ''), 10) || 1;
+    while (used.has(`C03-${String(num).padStart(5, '0')}`)) {
+      num += 1;
+    }
+    return `C03-${String(num).padStart(5, '0')}`;
+  }, [realArtifacts]);
 
   const realStats = useMemo(() => {
+    let verifiedCount = 0;
     let permittedCount = 0;
     let dublinCoreCompleteCount = 0;
     let totalRealImages = 0;
     let permittedRealImages = 0;
     let needConservationCount = 0;
+    let sufficientSourcesCount = 0;
 
     for (const a of realArtifacts) {
+      const rep = evaluateArtifactCompleteness(a);
+      if (
+        (a.verificationStatus === 'Đã xác minh' ||
+          a.verificationStatus === 'Đã kiểm chứng') &&
+        a.referenceSources.length > 0 &&
+        Boolean(a.currentStorageLocation.trim())
+      ) {
+        verifiedCount += 1;
+      }
       if (a.permissionStatus === 'Đã được phép' && !a.isDraft) {
         permittedCount += 1;
       }
-      const rep = evaluateArtifactCompleteness(a);
       if (rep.isDublinCoreComplete) {
         dublinCoreCompleteCount += 1;
       }
       if (rep.needsConservation) {
         needConservationCount += 1;
+      }
+      if (rep.hasSufficientSources) {
+        sufficientSourcesCount += 1;
       }
       totalRealImages += a.imageFiles.length;
       if (a.permissionStatus === 'Đã được phép') {
@@ -179,13 +275,25 @@ export const ArchiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
     return {
       totalReal: realArtifacts.length,
+      verifiedCount,
       permittedCount,
       dublinCoreCompleteCount,
       totalRealImages,
       permittedRealImages,
       needConservationCount,
+      sufficientSourcesCount,
     };
   }, [realArtifacts]);
+
+  const sourceStats = useMemo(() => {
+    return {
+      totalSources: sources.length,
+      officialSources: sources.filter((s) => s.isOfficial).length,
+      directArtifactSources: sources.filter((s) => s.sourceCategory === 'A').length,
+      unverifiedSources: sources.filter((s) => !s.isVerified).length,
+      artifactsWithTwoSources: realStats.sufficientSourcesCount,
+    };
+  }, [sources, realStats.sufficientSourcesCount]);
 
   const activeViewArtifacts = useMemo(() => {
     return isDemoMode ? [...realArtifacts, ...DEMO_ARTIFACTS] : realArtifacts;
@@ -199,12 +307,14 @@ export const ArchiveProvider: React.FC<{ children: React.ReactNode }> = ({
     activeViewArtifacts,
     familyProfile,
     sources,
+    permissions,
     isDemoMode,
     setIsDemoMode,
     isPublicPreview,
     setIsPublicPreview,
     geminiHealth,
     realStats,
+    sourceStats,
     refreshAll,
     upsertArtifact,
     removeArtifact,

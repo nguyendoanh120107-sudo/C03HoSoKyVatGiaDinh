@@ -37,6 +37,7 @@ import {
   exportArtifactsToCsv,
   exportArtifactsToJson,
   exportMissingFieldsReport,
+  exportSourcesList,
   exportStatsReport,
   ImportValidationResult,
   validateImportedJson,
@@ -107,6 +108,7 @@ export const ManageArtifactsPage: React.FC = () => {
   const {
     realArtifacts,
     familyProfile,
+    sources,
     upsertArtifact,
     removeArtifact,
     getNextCode,
@@ -139,6 +141,7 @@ export const ManageArtifactsPage: React.FC = () => {
   const [srcDate, setSrcDate] = useState(new Date().toISOString().slice(0, 10));
   const [srcUrl, setSrcUrl] = useState('');
   const [srcVerified, setSrcVerified] = useState('');
+  const [srcExtractedText, setSrcExtractedText] = useState('');
 
   // Export & Import state
   const [exportIncludePrivate, setExportIncludePrivate] = useState(false);
@@ -274,6 +277,7 @@ export const ManageArtifactsPage: React.FC = () => {
       recordedDate: srcDate,
       urlOrCode: srcUrl.trim(),
       verifiedContent: srcVerified.trim(),
+      extractedText: srcExtractedText.trim() || undefined,
     };
     setForm({
       ...form,
@@ -283,6 +287,7 @@ export const ManageArtifactsPage: React.FC = () => {
     setSrcAuthor('');
     setSrcUrl('');
     setSrcVerified('');
+    setSrcExtractedText('');
   };
 
   const handleSaveForm = async (asDraft: boolean) => {
@@ -434,7 +439,7 @@ export const ManageArtifactsPage: React.FC = () => {
           </label>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <button
             type="button"
             onClick={() => {
@@ -460,19 +465,31 @@ export const ManageArtifactsPage: React.FC = () => {
             className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-lg border border-[#70452F]/25 bg-[#F8F4EC]/70 hover:bg-[#EFE8DA] text-xs font-medium text-[#231B15]"
           >
             <FileSpreadsheet className="w-4 h-4 text-[#52624B]" />
-            <span>Xuất CSV (Excel)</span>
+            <span>Xuất CSV (Excel UTF-8 BOM)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              const fname = exportSourcesList(sources);
+              setFeedback(`Đã xuất danh sách nguồn tư liệu: ${fname}`);
+            }}
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-lg border border-[#70452F]/25 bg-[#F8F4EC]/70 hover:bg-[#EFE8DA] text-xs font-medium text-[#231B15]"
+          >
+            <FileText className="w-4 h-4 text-[#52624B]" />
+            <span>Xuất danh sách nguồn</span>
           </button>
 
           <button
             type="button"
             onClick={() => {
               const fname = exportMissingFieldsReport(realArtifacts);
-              setFeedback(`Đã xuất báo cáo trường còn thiếu: ${fname}`);
+              setFeedback(`Đã xuất danh sách hồ sơ chưa đủ điều kiện / thiếu trường: ${fname}`);
             }}
             className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-lg border border-[#70452F]/25 bg-[#F8F4EC]/70 hover:bg-[#EFE8DA] text-xs font-medium text-[#231B15]"
           >
             <FileText className="w-4 h-4 text-[#70452F]" />
-            <span>Xuất DS thiếu trường</span>
+            <span>Xuất DS hồ sơ chưa đủ điều kiện</span>
           </button>
 
           <button
@@ -1312,6 +1329,13 @@ export const ManageArtifactsPage: React.FC = () => {
                     placeholder="Phần nội dung được nguồn xác nhận"
                     className="h-9 px-2.5 rounded-lg bg-white border border-[#70452F]/25"
                   />
+                  <textarea
+                    rows={2}
+                    value={srcExtractedText}
+                    onChange={(e) => setSrcExtractedText(e.target.value)}
+                    placeholder="Văn bản trích trực tiếp từ nguồn (dán đoạn trích thực tế từ trang nguồn để đối chiếu trước khi xác nhận)..."
+                    className="sm:col-span-3 p-2.5 rounded-lg bg-white border border-[#70452F]/25"
+                  />
                   <div className="sm:col-span-3">
                     <button
                       type="button"
@@ -1330,15 +1354,25 @@ export const ManageArtifactsPage: React.FC = () => {
                         key={s.id}
                         className="p-3 rounded-lg border border-[#70452F]/15 flex flex-wrap items-center justify-between gap-2"
                       >
-                        <div>
+                        <div className="space-y-0.5">
                           <span className="font-semibold text-[#231B15]">
                             {s.sourceName}
                           </span>{' '}
                           · {s.sourceType} · {s.authorOrProvider || 'Chưa rõ'} ·{' '}
                           {s.recordedDate}
+                          {s.urlOrCode && (
+                            <p className="text-[#52624B] break-all">
+                              URL/Mã: {s.urlOrCode}
+                            </p>
+                          )}
                           {s.verifiedContent && (
-                            <p className="text-[#65564A] mt-0.5">
+                            <p className="text-[#65564A]">
                               Xác nhận: {s.verifiedContent}
+                            </p>
+                          )}
+                          {s.extractedText && (
+                            <p className="text-[#231B15] bg-[#F8F4EC]/80 p-2 rounded mt-1">
+                              Trích dẫn: “{s.extractedText}”
                             </p>
                           )}
                         </div>

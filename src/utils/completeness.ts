@@ -18,11 +18,11 @@ const REQUIRED_EXTENDED_LABELS: Array<{ key: keyof FamilyArtifact; label: string
   { key: 'material', label: 'Chất liệu' },
   { key: 'dimensions', label: 'Kích thước' },
   { key: 'artifactCategory', label: 'Loại kỷ vật' },
-  { key: 'currentStorageLocation', label: 'Nơi lưu giữ hiện tại' },
+  { key: 'currentStorageLocation', label: 'Nơi lưu giữ hiện nay' },
   { key: 'displayedCopyType', label: 'Loại bản hiển thị' },
   { key: 'originalCondition', label: 'Tình trạng bản gốc' },
-  { key: 'familyStory', label: 'Câu chuyện gia đình' },
-  { key: 'storyTeller', label: 'Người kể chuyện' },
+  { key: 'familyStory', label: 'Câu chuyện / giá trị lịch sử' },
+  { key: 'storyTeller', label: 'Người cung cấp / nguồn kể chuyện' },
   { key: 'permissionGrantedBy', label: 'Người cho phép công bố' },
   { key: 'permissionScope', label: 'Phạm vi được phép sử dụng' },
 ];
@@ -33,7 +33,11 @@ export function evaluateArtifactCompleteness(artifact: FamilyArtifact): Complete
   let dcFilled = 0;
   for (const field of DUBLIN_CORE_FIELDS) {
     const val = String(artifact[field.key] ?? '').trim();
-    if (val.length > 0 && val.toLowerCase() !== 'chưa cập nhật') {
+    if (
+      val.length > 0 &&
+      val.toLowerCase() !== 'chưa cập nhật' &&
+      !val.toLowerCase().includes('chưa xác định theo tài liệu')
+    ) {
       dcFilled += 1;
     } else {
       missingFields.push(field.labelVi);
@@ -43,7 +47,13 @@ export function evaluateArtifactCompleteness(artifact: FamilyArtifact): Complete
   let extFilled = 0;
   for (const item of REQUIRED_EXTENDED_LABELS) {
     const val = String(artifact[item.key] ?? '').trim();
-    if (val.length > 0 && val.toLowerCase() !== 'chưa cập nhật') {
+    if (
+      val.length > 0 &&
+      val.toLowerCase() !== 'chưa cập nhật' &&
+      !val.toLowerCase().includes('chưa xác định theo tài liệu') &&
+      !val.toLowerCase().includes('không rõ – nguồn chưa công bố') &&
+      !val.toLowerCase().includes('chưa có văn bản xác nhận')
+    ) {
       extFilled += 1;
     } else {
       missingFields.push(item.label);
@@ -55,13 +65,16 @@ export function evaluateArtifactCompleteness(artifact: FamilyArtifact): Complete
     missingFields.push('Tối thiểu 2 nguồn đối chiếu');
   }
 
-  const hasImages = (artifact.imageFiles?.length ?? 0) >= 1;
-  if (!hasImages) {
-    missingFields.push('Ảnh chụp kỷ vật thật');
+  const hasPermittedImages =
+    artifact.permissionStatus === 'Đã được phép' &&
+    artifact.imageFiles.some((img) => img.isPermittedForPublic);
+  if (!hasPermittedImages) {
+    missingFields.push('Ảnh thật được phép công bố');
   }
 
   const totalItems = DUBLIN_CORE_FIELDS.length + REQUIRED_EXTENDED_LABELS.length + 2;
-  const filledItems = dcFilled + extFilled + (hasSources ? 1 : 0) + (hasImages ? 1 : 0);
+  const filledItems =
+    dcFilled + extFilled + (hasSources ? 1 : 0) + (hasPermittedImages ? 1 : 0);
   const percentage = Math.round((filledItems / totalItems) * 100);
 
   return {
@@ -81,7 +94,18 @@ export function evaluateArtifactCompleteness(artifact: FamilyArtifact): Complete
 }
 
 export function isArtifactPubliclyVisible(artifact: FamilyArtifact): boolean {
-  return artifact.permissionStatus === 'Đã được phép' && !artifact.isDraft;
+  if (artifact.isDraft || artifact.permissionStatus === 'Đã thu hồi quyền') {
+    return false;
+  }
+  if (artifact.permissionStatus === 'Đã được phép') {
+    return true;
+  }
+  // Verified public museum metadata records are visible for catalog inspection (without unpermitted photos!)
+  return (
+    Boolean(artifact.isPackagedPublic) &&
+    (artifact.verificationStatus === 'Đã xác minh' ||
+      artifact.verificationStatus === 'Đã kiểm chứng')
+  );
 }
 
 export function getPublicPermittedImages(artifact: FamilyArtifact) {
@@ -98,11 +122,11 @@ export function sanitizeArtifactForPublic(artifact: FamilyArtifact): FamilyArtif
   return {
     ...artifact,
     currentStorageLocation:
-      artifact.permissionStatus === 'Đã được phép'
+      artifact.permissionStatus !== 'Đã thu hồi quyền'
         ? artifact.currentStorageLocation || 'Chưa cập nhật'
         : 'Thông tin hạn chế công bố',
     restrictedContent: hasRestricted
-      ? 'Đã ẩn nội dung hạn chế theo yêu cầu của người giữ kỷ vật'
+      ? 'Đã ẩn nội dung hạn chế theo yêu cầu quyền sử dụng'
       : '',
     imageFiles: permittedImages,
     imageCaptions: permittedImages.map((img) => img.caption),
@@ -112,17 +136,17 @@ export function sanitizeArtifactForPublic(artifact: FamilyArtifact): FamilyArtif
 
 export function sanitizeArtifactsForGemini(artifacts: FamilyArtifact[]) {
   return artifacts
-    .filter((a) => a.permissionStatus === 'Đã được phép')
+    .filter((a) => isArtifactPubliclyVisible(a))
     .map((a) => ({
       identifier: a.identifier,
       title: a.title || 'Chưa cập nhật',
-      creator: a.creator || 'Chưa cập nhật',
+      creator: a.creator || 'Chưa xác định theo tài liệu đã tra cứu',
       subject: a.subject || 'Chưa cập nhật',
       description: a.description || 'Chưa cập nhật',
       date: a.date || 'Chưa cập nhật',
       type: a.type || 'Chưa cập nhật',
-      material: a.material || 'Chưa cập nhật',
-      dimensions: a.dimensions || 'Chưa cập nhật',
+      material: a.material || 'Chưa xác định theo tài liệu đã tra cứu',
+      dimensions: a.dimensions || 'Chưa xác định theo tài liệu đã tra cứu',
       artifactCategory: a.artifactCategory || 'Chưa cập nhật',
       originalCondition: a.originalCondition,
       displayedCopyType: a.displayedCopyType,
@@ -140,7 +164,10 @@ export function sanitizeArtifactsForGemini(artifacts: FamilyArtifact[]) {
       sourcesSummary:
         a.referenceSources.length > 0
           ? a.referenceSources
-              .map((s) => `${s.sourceName} (${s.sourceType} - ${s.authorOrProvider})`)
+              .map(
+                (s) =>
+                  `${s.sourceName} (${s.sourceType}${s.urlOrCode ? ` - ${s.urlOrCode}` : ''})`
+              )
               .join('; ')
           : a.source || 'Chưa cập nhật nguồn đối chiếu',
     }));

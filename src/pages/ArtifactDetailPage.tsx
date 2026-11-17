@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  ExternalLink,
   Printer,
   Share2,
   Sparkles,
@@ -25,6 +26,7 @@ import {
   displayOrPlaceholder,
   evaluateArtifactCompleteness,
   getPublicPermittedImages,
+  isArtifactPubliclyVisible,
 } from '../utils/completeness';
 
 export const ArtifactDetailPage: React.FC = () => {
@@ -42,7 +44,6 @@ export const ArtifactDetailPage: React.FC = () => {
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
 
-  // On-demand Gemini state
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiSuggestion, setAiSuggestion] = useState<string>('');
@@ -67,42 +68,34 @@ export const ArtifactDetailPage: React.FC = () => {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center space-y-4">
         <h1 className="font-editorial text-2xl font-semibold text-[#231B15]">
-          Không tìm thấy hồ sơ kỷ vật
+          Không tìm thấy hồ sơ hiện vật
         </h1>
-        <p className="text-sm text-[#65564A]">
-          Hồ sơ không tồn tại trong bộ nhớ trình duyệt hiện tại hoặc chế độ DEMO đang tắt.
-        </p>
         <Link
           to="/kho-ky-vat"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#70452F] text-white text-sm font-medium"
         >
           <ArrowLeft className="w-4 h-4" />
-          Quay lại Kho kỷ vật
+          Quay lại Kho hiện vật
         </Link>
       </div>
     );
   }
 
-  const isRestrictedFromPublic =
-    isPublicPreview &&
-    (artifact.permissionStatus !== 'Đã được phép' || Boolean(artifact.isDraft));
-
-  if (isRestrictedFromPublic) {
+  if (isPublicPreview && !isArtifactPubliclyVisible(artifact)) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center space-y-4">
         <h1 className="font-editorial text-2xl font-semibold text-[#231B15]">
-          Hồ sơ chưa được phép công bố công khai
+          Hồ sơ đang bị hạn chế hoặc thu hồi quyền công bố
         </h1>
-        <p className="text-sm text-[#65564A] max-w-lg mx-auto">
-          Theo thiết lập quyền sử dụng hiện tại ({artifact.permissionStatus}), kỷ vật{' '}
-          <span className="font-mono">{artifact.identifier}</span> và hình ảnh liên quan không hiển thị trong chế độ công khai.
+        <p className="text-sm text-[#65564A]">
+          Mã hồ sơ <span className="font-mono">{artifact.identifier}</span> hiện không hiển thị trên giao diện công khai.
         </p>
         <Link
           to="/kho-ky-vat"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#70452F] text-white text-sm font-medium"
         >
           <ArrowLeft className="w-4 h-4" />
-          Quay lại Kho kỷ vật
+          Quay lại Kho hiện vật
         </Link>
       </div>
     );
@@ -117,6 +110,10 @@ export const ArtifactDetailPage: React.FC = () => {
 
   const currentImg = visibleImages[activeImgIdx];
   const completeness = evaluateArtifactCompleteness(artifact);
+  const officialSourceUrl =
+    artifact.referenceSources[0]?.urlOrCode ||
+    artifact.imageSources[0] ||
+    'https://www.baotangbacninh.vn/ds-hien-vat';
 
   const relatedArtifacts = activeViewArtifacts.filter(
     (other) =>
@@ -137,9 +134,9 @@ export const ArtifactDetailPage: React.FC = () => {
       return;
     }
 
-    const storyText = artifact.familyStory?.trim();
+    const storyText = artifact.familyStory?.trim() || artifact.description?.trim();
     if (!storyText) {
-      setSpeechError('Kỷ vật này chưa có câu chuyện được ghi nhận để đọc.');
+      setSpeechError('Hiện vật này chưa có nội dung câu chuyện để đọc.');
       return;
     }
 
@@ -164,10 +161,8 @@ export const ArtifactDetailPage: React.FC = () => {
   };
 
   const handleRequestGeminiDescription = async () => {
-    if (artifact.permissionStatus !== 'Đã được phép') {
-      setAiError(
-        'Vì quy tắc bảo mật thông tin gia đình, chỉ gửi hồ sơ đã ở trạng thái “Đã được phép” cho Gemini.'
-      );
+    if (!isArtifactPubliclyVisible(artifact)) {
+      setAiError('Chỉ hỗ trợ gửi các hồ sơ công khai đã xác minh hoặc được cấp phép.');
       return;
     }
     setAiLoading(true);
@@ -197,7 +192,7 @@ export const ArtifactDetailPage: React.FC = () => {
       aiDraftNotes: aiEditedText.trim(),
       updatedAt: new Date().toISOString(),
     });
-    setAiSavedMsg('Đã lưu vào ghi chú đề xuất của người quản lý (chưa tự động công bố).');
+    setAiSavedMsg('Đã lưu vào ghi chú đề xuất cục bộ (chưa tự động công bố).');
   };
 
   const handleDownloadOriginalImage = async () => {
@@ -241,7 +236,7 @@ export const ArtifactDetailPage: React.FC = () => {
           className="inline-flex items-center gap-1.5 text-sm font-medium text-[#70452F] hover:underline"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Quay lại Kho kỷ vật</span>
+          <span>Quay lại Kho hiện vật</span>
         </Link>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -275,20 +270,18 @@ export const ArtifactDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Demo Warning if applicable */}
       {artifact.isDemo && (
         <div className="bg-[#C59A54]/20 border border-[#C59A54]/50 rounded-xl p-4 text-sm text-[#543220] font-medium">
-          Dữ liệu minh họa, không dùng nghiệm thu — đây là bản ghi trình diễn trong chế độ DEMO.
+          Dữ liệu minh họa, không dùng nghiệm thu — bản ghi trình diễn trong chế độ DEMO.
         </div>
       )}
 
-      {/* Main Accession Layout: Gallery + Key Identity */}
+      {/* Gallery + Accession Metadata */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left: Multi-angle Interactive Image Viewer */}
         <section className="lg:col-span-7 bg-white rounded-2xl border border-[#70452F]/15 p-5 space-y-4 print-only-clean">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-sm font-semibold text-[#231B15]">
-              Thư viện ảnh tư liệu ({visibleImages.length} góc chụp được phép hiển thị)
+              Hình ảnh tư liệu ({visibleImages.length} ảnh được cấp phép)
             </h2>
             {currentImg && (
               <div className="no-print flex items-center gap-1.5">
@@ -314,7 +307,7 @@ export const ArtifactDetailPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setZoom(1)}
-                  aria-label="Đặt lại kích thước ảnh"
+                  aria-label="Đặt lại kích thước"
                   className="p-1.5 rounded border border-[#70452F]/20 hover:bg-[#F8F4EC]"
                 >
                   <RotateCcw className="w-4 h-4" />
@@ -364,27 +357,26 @@ export const ArtifactDetailPage: React.FC = () => {
                 )}
               </div>
 
-              {/* Mandatory Caption & Provenance directly under photo */}
               <div className="bg-[#F8F4EC]/70 rounded-xl p-4 space-y-2 text-xs">
                 <p className="text-sm font-medium text-[#231B15]">
-                  {displayOrPlaceholder(currentImg.caption)}
+                  {artifact.title} — {displayOrPlaceholder(currentImg.caption)}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[#65564A]">
                   <div>
-                    <span className="font-medium text-[#231B15]">Góc chụp & Tên tệp:</span>{' '}
-                    {currentImg.angle} (<span className="font-mono">{currentImg.fileName}</span>)
+                    <span className="font-medium text-[#231B15]">Nguồn / Người chụp:</span>{' '}
+                    {displayOrPlaceholder(currentImg.photographerOrSource)}
                   </div>
                   <div>
-                    <span className="font-medium text-[#231B15]">Người chụp / Nguồn:</span>{' '}
-                    {displayOrPlaceholder(currentImg.photographerOrSource)}
+                    <span className="font-medium text-[#231B15]">Quyền sử dụng:</span>{' '}
+                    {displayOrPlaceholder(currentImg.usagePermission)}
                   </div>
                   <div>
                     <span className="font-medium text-[#231B15]">Ngày chụp:</span>{' '}
                     {displayOrPlaceholder(currentImg.captureDate)}
                   </div>
                   <div>
-                    <span className="font-medium text-[#231B15]">Quyền sử dụng:</span>{' '}
-                    {displayOrPlaceholder(currentImg.usagePermission)}
+                    <span className="font-medium text-[#231B15]">Tên tệp:</span>{' '}
+                    <span className="font-mono">{currentImg.fileName}</span>
                   </div>
                 </div>
                 {!isPublicPreview &&
@@ -402,46 +394,28 @@ export const ArtifactDetailPage: React.FC = () => {
                     </div>
                   )}
               </div>
-
-              {/* Angle Thumbnail Strip */}
-              {visibleImages.length > 1 && (
-                <div className="no-print flex gap-2.5 overflow-x-auto pb-1">
-                  {visibleImages.map((img, i) => (
-                    <button
-                      key={img.id}
-                      type="button"
-                      onClick={() => {
-                        setZoom(1);
-                        setActiveImgIdx(i);
-                      }}
-                      className={`shrink-0 w-24 rounded-lg overflow-hidden border text-left transition-colors ${
-                        i === activeImgIdx
-                          ? 'border-[#70452F] ring-2 ring-[#C59A54]'
-                          : 'border-[#70452F]/15 opacity-80 hover:opacity-100'
-                      }`}
-                    >
-                      <img
-                        src={img.displayDataUrl}
-                        alt={img.angle}
-                        className="w-full h-14 object-cover"
-                      />
-                      <p className="px-1.5 py-1 text-[10px] truncate bg-white text-[#231B15]">
-                        {img.angle}
-                      </p>
-                    </button>
-                  ))}
-                </div>
-              )}
             </>
           ) : (
-            <ArtifactPlaceholder
-              className="aspect-[4/3] rounded-xl"
-              reason={
-                artifact.permissionStatus !== 'Đã được phép'
-                  ? 'Chưa có ảnh tư liệu được phép công bố (chưa có sự đồng ý công bố hoặc đã thu hồi quyền)'
-                  : 'Chưa có ảnh tư liệu được phép công bố'
-              }
-            />
+            <div className="space-y-4">
+              <ArtifactPlaceholder
+                className="aspect-[4/3] rounded-xl"
+                reason="Chưa xác minh quyền đăng lại ảnh — không sao chép ảnh từ trang bảo tàng khi chưa có văn bản cho phép"
+              />
+              <div className="no-print p-4 rounded-xl bg-[#F8F4EC] border border-[#70452F]/15 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <span className="text-[#65564A]">
+                  Bạn có thể xem trực tiếp tư liệu và hình ảnh gốc tại trang chính thức của đơn vị lưu giữ:
+                </span>
+                <a
+                  href={officialSourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#52624B] text-white font-medium hover:bg-[#3F4D39]"
+                >
+                  <span>Mở trang nguồn chính thức</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
           )}
         </section>
 
@@ -449,21 +423,26 @@ export const ArtifactDetailPage: React.FC = () => {
         <section className="lg:col-span-5 bg-white rounded-2xl border border-[#70452F]/15 p-6 space-y-5 print-only-clean">
           <div className="space-y-2 border-b border-[#70452F]/10 pb-4">
             <div className="text-xs font-mono text-[#70452F] tabular-nums">
-              Mã định danh: {artifact.identifier} · Số đăng ký: {artifact.registrationNumber}
+              Mã hồ sơ: {artifact.identifier} · Số đăng ký / kiểm kê: {artifact.registrationNumber}
             </div>
             <h1 className="font-editorial text-2xl sm:text-3xl font-semibold text-[#231B15]">
               {displayOrPlaceholder(artifact.title)}
             </h1>
             <p className="text-xs text-[#65564A]">
-              Loại bản hiển thị: <strong className="text-[#231B15]">{artifact.displayedCopyType}</strong> · Hoàn thiện hồ sơ:{' '}
-              <strong className="text-[#231B15] tabular-nums">{completeness.percentage}%</strong>
+              Loại bản hiển thị: <strong className="text-[#231B15]">{artifact.displayedCopyType}</strong> · Mức kiểm chứng:{' '}
+              <strong className="text-[#52624B]">{artifact.verificationStatus}</strong> · Hoàn thiện:{' '}
+              <strong className="tabular-nums">{completeness.percentage}%</strong>
             </p>
           </div>
 
           <dl className="divide-y divide-[#70452F]/10 text-sm">
             <div className="py-2.5 flex justify-between gap-4">
-              <dt className="text-[#65564A]">Loại kỷ vật</dt>
-              <dd className="font-medium text-right">{displayOrPlaceholder(artifact.artifactCategory)}</dd>
+              <dt className="text-[#65564A]">Nơi lưu giữ hiện nay</dt>
+              <dd className="font-medium text-right">{displayOrPlaceholder(artifact.currentStorageLocation)}</dd>
+            </div>
+            <div className="py-2.5 flex justify-between gap-4">
+              <dt className="text-[#65564A]">Nơi lưu giữ thời điểm tư liệu</dt>
+              <dd className="font-medium text-right">{displayOrPlaceholder(artifact.historicalStorageLocation)}</dd>
             </div>
             <div className="py-2.5 flex justify-between gap-4">
               <dt className="text-[#65564A]">Chất liệu</dt>
@@ -474,35 +453,27 @@ export const ArtifactDetailPage: React.FC = () => {
               <dd className="font-medium text-right">{displayOrPlaceholder(artifact.dimensions)}</dd>
             </div>
             <div className="py-2.5 flex justify-between gap-4">
-              <dt className="text-[#65564A]">Niên đại & Kiểm chứng</dt>
-              <dd className="font-medium text-right">
-                {displayOrPlaceholder(artifact.date)} ({artifact.verificationStatus})
-              </dd>
+              <dt className="text-[#65564A]">Niên đại & căn cứ</dt>
+              <dd className="font-medium text-right">{displayOrPlaceholder(artifact.date)}</dd>
             </div>
             <div className="py-2.5 flex justify-between gap-4">
               <dt className="text-[#65564A]">Tình trạng bản gốc</dt>
               <dd className="font-medium text-right">{artifact.originalCondition}</dd>
             </div>
             <div className="py-2.5 flex justify-between gap-4">
-              <dt className="text-[#65564A]">Chủ sở hữu / Người tạo lập</dt>
-              <dd className="font-medium text-right">{displayOrPlaceholder(artifact.creator)}</dd>
-            </div>
-            <div className="py-2.5 flex justify-between gap-4">
-              <dt className="text-[#65564A]">Nơi lưu giữ hiện tại</dt>
+              <dt className="text-[#65564A]">Người số hóa / Ngày số hóa</dt>
               <dd className="font-medium text-right">
-                {artifact.permissionStatus === 'Đã được phép'
-                  ? displayOrPlaceholder(artifact.currentStorageLocation)
-                  : 'Ẩn đến khi được cấp quyền công bố'}
+                {displayOrPlaceholder(artifact.digitizedBy)} ({displayOrPlaceholder(artifact.digitizedDate)})
               </dd>
             </div>
             <div className="py-2.5 flex justify-between gap-4">
-              <dt className="text-[#65564A]">Người cho phép công bố</dt>
+              <dt className="text-[#65564A]">Người cho phép & Vai trò</dt>
               <dd className="font-medium text-right">
                 {displayOrPlaceholder(artifact.permissionGrantedBy)} ({displayOrPlaceholder(artifact.permissionRole)})
               </dd>
             </div>
             <div className="py-2.5 flex justify-between gap-4">
-              <dt className="text-[#65564A]">Trạng thái & Phạm vi quyền</dt>
+              <dt className="text-[#65564A]">Quyền công bố & Phạm vi</dt>
               <dd className="font-medium text-right">
                 {artifact.permissionStatus} — {displayOrPlaceholder(artifact.permissionScope)}
               </dd>
@@ -511,25 +482,25 @@ export const ArtifactDetailPage: React.FC = () => {
         </section>
       </div>
 
-      {/* Editorial Description & Family Story + Web Speech + Gemini On-Demand */}
+      {/* Story + Web Speech + On-Demand Gemini */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <section className="lg:col-span-7 bg-white rounded-2xl border border-[#70452F]/15 p-6 sm:p-8 space-y-6 print-only-clean">
           <div className="space-y-3">
             <h2 className="font-editorial text-2xl font-semibold text-[#231B15]">
-              Đặc điểm mô tả & Niên đại
+              Mô tả đối chiếu & Lịch sử tiếp nhận
             </h2>
             <p className="text-sm sm:text-base text-[#231B15] leading-relaxed">
               {displayOrPlaceholder(artifact.description)}
             </p>
             <p className="text-xs text-[#65564A]">
-              Lịch sử lưu truyền / Tiếp nhận: {displayOrPlaceholder(artifact.acquisitionHistory)}
+              Nguồn gốc tiếp nhận: {displayOrPlaceholder(artifact.acquisitionHistory)}
             </p>
           </div>
 
           <div className="border-t border-[#70452F]/15 pt-6 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-editorial text-2xl font-semibold text-[#231B15]">
-                Câu chuyện gắn với kỷ vật
+                Giá trị ký ức & Câu chuyện gắn với hiện vật
               </h2>
               <button
                 type="button"
@@ -566,18 +537,17 @@ export const ArtifactDetailPage: React.FC = () => {
 
             <div className="text-xs text-[#65564A] flex flex-wrap gap-x-6 gap-y-1">
               <span>
-                Người kể chuyện: <strong className="text-[#231B15]">{displayOrPlaceholder(artifact.storyTeller)}</strong>
+                Nguồn kể / ghi nhận: <strong className="text-[#231B15]">{displayOrPlaceholder(artifact.storyTeller)}</strong>
               </span>
               <span>
-                Thời điểm ghi nhận: <strong className="text-[#231B15]">{displayOrPlaceholder(artifact.storyRecordedDate)}</strong>
+                Ngày ghi nhận: <strong className="text-[#231B15]">{displayOrPlaceholder(artifact.storyRecordedDate)}</strong>
               </span>
               <span>
-                Kiểm chứng câu chuyện: <strong className="text-[#231B15]">{artifact.storyVerificationStatus}</strong>
+                Kiểm chứng: <strong className="text-[#231B15]">{artifact.storyVerificationStatus}</strong>
               </span>
             </div>
           </div>
 
-          {/* On-demand Gemini Description Assistant */}
           {!isPublicPreview && (
             <div className="no-print border-t border-[#70452F]/15 pt-6 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -586,7 +556,7 @@ export const ArtifactDetailPage: React.FC = () => {
                     Chuẩn hóa mô tả với Google Gemini
                   </h3>
                   <p className="text-xs text-[#65564A]">
-                    Chỉ hoạt động khi bạn chủ động nhấn nút. Không gửi nội dung bị hạn chế hay ảnh chưa cấp phép.
+                    Chỉ hoạt động khi bạn chủ động yêu cầu. Không tự xác nhận tính đúng sai thay cho tư liệu.
                   </p>
                 </div>
                 <button
@@ -617,7 +587,7 @@ export const ArtifactDetailPage: React.FC = () => {
                     rows={5}
                     value={aiEditedText}
                     onChange={(e) => setAiEditedText(e.target.value)}
-                    className="w-full p-3 rounded-lg bg-white border border-[#70452F]/20 text-sm text-[#231B15] focus:outline-none focus:ring-2 focus:ring-[#C59A54]"
+                    className="w-full p-3 rounded-lg bg-white border border-[#70452F]/20 text-sm text-[#231B15]"
                   />
                   <div className="flex flex-wrap items-center gap-3">
                     {!artifact.isDemo && (
@@ -641,64 +611,58 @@ export const ArtifactDetailPage: React.FC = () => {
           )}
         </section>
 
-        {/* Right: Sources, Verification, Related & 15 Dublin Core Table */}
+        {/* Right: Sources, Unresolved Questions & Related */}
         <section className="lg:col-span-5 space-y-6">
           <div className="bg-white rounded-2xl border border-[#70452F]/15 p-6 space-y-4 print-only-clean">
             <h2 className="font-editorial text-xl font-semibold text-[#231B15]">
-              Nguồn tư liệu & Mức kiểm chứng
+              Nguồn dẫn chứng & Những điểm chưa rõ
             </h2>
             <p className="text-xs text-[#65564A]">
-              Nguồn tóm tắt (dc:source): {displayOrPlaceholder(artifact.source)}
+              Nguồn tóm tắt: {displayOrPlaceholder(artifact.source)}
             </p>
-            {artifact.referenceSources.length === 0 ? (
-              <p className="text-xs text-[#70452F]">
-                Chưa có nguồn đối chiếu chi tiết nào được liên kết cho hồ sơ này.
-              </p>
-            ) : (
-              <ul className="space-y-3">
-                {artifact.referenceSources.map((src) => (
-                  <li
-                    key={src.id}
-                    className="p-3 rounded-lg bg-[#F8F4EC]/70 border border-[#70452F]/10 text-xs space-y-1"
-                  >
-                    <p className="font-semibold text-[#231B15]">{src.sourceName}</p>
-                    <p className="text-[#65564A]">
-                      {src.sourceType} · Cung cấp: {displayOrPlaceholder(src.authorOrProvider)} · Ngày: {displayOrPlaceholder(src.recordedDate)}
-                    </p>
-                    {src.verifiedContent && (
-                      <p className="text-[#231B15]">Xác nhận: {src.verifiedContent}</p>
-                    )}
-                    {src.urlOrCode && src.urlOrCode.startsWith('http') && (
-                      <a
-                        href={src.urlOrCode}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#70452F] hover:underline inline-block"
-                      >
-                        Mở liên kết nguồn ↗
-                      </a>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
+            <ul className="space-y-3">
+              {artifact.referenceSources.map((src) => (
+                <li
+                  key={src.id}
+                  className="p-3 rounded-lg bg-[#F8F4EC]/70 border border-[#70452F]/10 text-xs space-y-1"
+                >
+                  <p className="font-semibold text-[#231B15]">{src.sourceName}</p>
+                  <p className="text-[#65564A]">
+                    {src.sourceType} · {displayOrPlaceholder(src.authorOrProvider)} · Truy cập: {displayOrPlaceholder(src.recordedDate)}
+                  </p>
+                  {src.verifiedContent && (
+                    <p className="text-[#231B15]">Xác nhận: {src.verifiedContent}</p>
+                  )}
+                  {src.urlOrCode && src.urlOrCode.startsWith('http') && (
+                    <a
+                      href={src.urlOrCode}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#70452F] hover:underline inline-flex items-center gap-1"
+                    >
+                      <span>Mở liên kết nguồn</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
 
-            {artifact.unresolvedQuestions && (
-              <div className="pt-2 border-t border-[#70452F]/10 text-xs">
-                <p className="font-semibold text-[#231B15]">Vấn đề cần tiếp tục xác minh:</p>
-                <p className="text-[#65564A] mt-1">{artifact.unresolvedQuestions}</p>
-              </div>
-            )}
+            <div className="pt-2 border-t border-[#70452F]/10 text-xs">
+              <p className="font-semibold text-[#231B15]">Những điểm chưa rõ cần tiếp tục tra cứu:</p>
+              <p className="text-[#65564A] mt-1">
+                {displayOrPlaceholder(artifact.unresolvedQuestions)}
+              </p>
+            </div>
           </div>
 
-          {/* Related Artifacts */}
           <div className="bg-white rounded-2xl border border-[#70452F]/15 p-6 space-y-3 print-only-clean">
             <h2 className="font-editorial text-xl font-semibold text-[#231B15]">
-              Kỷ vật có liên quan
+              Hiện vật liên quan
             </h2>
             {relatedArtifacts.length === 0 ? (
               <p className="text-xs text-[#65564A]">
-                Chưa có kỷ vật liên quan được gắn kết ({displayOrPlaceholder(artifact.relation)}).
+                Chưa có hiện vật liên quan ({displayOrPlaceholder(artifact.relation)}).
               </p>
             ) : (
               <ul className="space-y-2">
@@ -721,16 +685,16 @@ export const ArtifactDetailPage: React.FC = () => {
         </section>
       </div>
 
-      {/* Full 15 Dublin Core Metadata Table */}
+      {/* 15 Dublin Core Metadata Table */}
       <section className="bg-white rounded-2xl border border-[#70452F]/15 p-6 sm:p-8 space-y-4 print-only-clean">
         <h2 className="font-editorial text-2xl font-semibold text-[#231B15]">
-          Bảng siêu dữ liệu 15 trường chuẩn Dublin Core
+          Bảng 15 trường chuẩn Dublin Core
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs sm:text-sm border-collapse">
             <thead>
               <tr className="border-b border-[#70452F]/20 text-[#65564A]">
-                <th className="py-2.5 pr-4 font-medium">Trường chuẩn</th>
+                <th className="py-2.5 pr-4 font-medium">Trường tiếng Việt</th>
                 <th className="py-2.5 pr-4 font-medium">Thuật ngữ</th>
                 <th className="py-2.5 font-medium">Giá trị ghi nhận</th>
               </tr>

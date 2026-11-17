@@ -1,4 +1,5 @@
 import express from 'express';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
@@ -13,6 +14,48 @@ const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json({ limit: '2mb' }));
+
+function readJsonDataFile(fileName: string): unknown {
+  const filePath = path.resolve(__dirname, 'src', 'data', fileName);
+  const raw = fs.readFileSync(filePath, 'utf-8');
+  return JSON.parse(raw);
+}
+
+app.get('/api/public/artifacts', (_req, res) => {
+  try {
+    res.json(readJsonDataFile('artifacts.json'));
+  } catch (err) {
+    res.status(500).json({ error: 'Không đọc được artifacts.json' });
+  }
+});
+
+app.get('/api/public/sources', (_req, res) => {
+  try {
+    res.json(readJsonDataFile('sources.json'));
+  } catch (err) {
+    res.status(500).json({ error: 'Không đọc được sources.json' });
+  }
+});
+
+app.get('/api/public/permissions', (_req, res) => {
+  try {
+    res.json(readJsonDataFile('permissions.json'));
+  } catch (err) {
+    res.status(500).json({ error: 'Không đọc được permissions.json' });
+  }
+});
+
+app.get('/api/public/bundle', (_req, res) => {
+  try {
+    res.json({
+      artifacts: readJsonDataFile('artifacts.json'),
+      sources: readJsonDataFile('sources.json'),
+      permissions: readJsonDataFile('permissions.json'),
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Không đọc được gói dữ liệu công khai.' });
+  }
+});
 
 function getGeminiClient(): GoogleGenAI | null {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
@@ -104,33 +147,34 @@ app.post('/api/gemini/assist', async (req, res) => {
   }
 
   const systemInstruction = [
-    'Bạn là Trợ lý Ký ức Gia đình cho dự án phi lợi nhuận "Hồ sơ Kỷ vật Gia đình (Mã đề tài C03)".',
+    'Bạn là Trợ lý Ký ức & Số hóa Di sản cho dự án phi lợi nhuận "Hồ sơ Kỷ vật Gia đình (Mã đề tài C03)".',
     'QUY TẮC BẮT BUỘC:',
-    '1. Chỉ trả lời dựa trên dữ liệu hồ sơ được cung cấp trong ngữ cảnh dưới đây. TUYỆT ĐỐI KHÔNG bịa đặt niên đại, chủ sở hữu, địa điểm, sự kiện lịch sử hoặc câu chuyện.',
-    '2. Nếu không có dữ liệu hoặc câu hỏi vượt quá dữ liệu đã cung cấp, phải trả lời chính xác câu: "Chưa có tư liệu được xác minh để trả lời câu hỏi này."',
-    '3. Khi nhắc đến hoặc trả lời về bất kỳ kỷ vật nào, BẮT BUỘC phải ghi rõ 4 thông tin sau cho kỷ vật đó:',
-    '   - Mã bản ghi (identifier)',
-    '   - Nơi lưu giữ đã được phép tiết lộ',
-    '   - Loại bản đang hiển thị (Bản gốc / Bản sao / Bản số của gốc / Bản số của sao)',
-    '   - Nguồn được sử dụng',
-    '4. Không tự khẳng định nội dung gợi ý là đã kiểm chứng; giữ giọng văn trang trọng, chuẩn mực bảo tàng số Việt Nam, tiếng Việt có dấu.',
-    '5. Không bao giờ hiển thị số điện thoại, địa chỉ nhà chi tiết hay nội dung đã được đánh dấu hạn chế.',
+    '1. Chỉ trả lời dựa trên dữ liệu hồ sơ đã nạp trong ngữ cảnh dưới đây. TUYỆT ĐỐI KHÔNG bịa đặt thông tin, không tự tạo chứng cứ, không tự đánh dấu thông tin là đã kiểm chứng.',
+    '2. Nếu không có dữ liệu hoặc câu hỏi vượt quá dữ liệu đã nạp, phải trả lời chính xác câu: "Chưa có tư liệu xác minh để trả lời câu hỏi".',
+    '3. Khi nhắc đến hoặc trả lời về bất kỳ hiện vật nào, BẮT BUỘC phải ghi rõ 4 thông tin sau:',
+    '   - Mã hiện vật (identifier)',
+    '   - Nơi lưu giữ (currentStorageLocation)',
+    '   - Loại bản hiển thị (displayedCopyType)',
+    '   - Nguồn (sourcesSummary)',
+    '4. Giữ giọng văn trang trọng, chuẩn mực bảo tàng số Việt Nam, tiếng Việt có dấu.',
+    '5. Không bao giờ hiển thị số điện thoại, địa chỉ nhà riêng chi tiết hay nội dung bị hạn chế.',
   ].join('\n');
 
   const actionPrompts: Record<GeminiAssistAction, string> = {
-    qa: `Hãy trả lời câu hỏi sau của người dùng chỉ dựa trên bộ hồ sơ được phép:\n"${question ?? ''}"`,
-    summarize_story: `Hãy tóm tắt câu chuyện gắn với kỷ vật ${targetArtifactId ?? ''} dựa trên thông tin hồ sơ hiện có. Nếu chưa có câu chuyện được ghi nhận, hãy nêu rõ chưa có tư liệu được xác minh.`,
-    curatorial_narration: `Hãy đề xuất một đoạn nội dung thuyết minh trang trọng, súc tích cho khách tham quan bảo tàng số về kỷ vật ${targetArtifactId ?? ''}, bám sát hoàn toàn dữ liệu có trong hồ sơ và không suy đoán thêm chi tiết ngoài dữ liệu.`,
-    standardize_description: `Hãy chuẩn hóa phần mô tả chuyên môn (chất liệu, kích thước, tình trạng, đặc điểm nhận diện, niên đại và căn cứ) cho kỷ vật ${targetArtifactId ?? ''} theo chuẩn biên mục bảo tàng/Dublin Core từ dữ liệu hiện có. Những thông tin chưa có cần ghi rõ "Chưa cập nhật".`,
-    missing_info: `Hãy rà soát kỷ vật ${targetArtifactId ? targetArtifactId : 'hoặc toàn bộ danh sách hồ sơ'} và liệt kê cụ thể các trường thông tin quan trọng còn thiếu hoặc chưa kiểm chứng để người quản lý bổ sung.`,
-    interview_questions: `Dựa trên các thông tin hiện có và các câu hỏi còn bỏ ngỏ của kỷ vật ${targetArtifactId ?? ''}, hãy đề xuất 5-7 câu hỏi phỏng vấn thực tế, lễ phép, gần gũi để hỏi ông bà hoặc người thân trong gia đình nhằm bổ sung tư liệu xác thực.`,
+    qa: `Hãy trả lời câu hỏi sau chỉ dựa trên dữ liệu hồ sơ đã nạp:\n"${question ?? ''}"`,
+    summarize_story: `Hãy tóm tắt thông tin và câu chuyện gắn với hiện vật ${targetArtifactId ?? ''} dựa trên hồ sơ đã nạp.`,
+    curatorial_narration: `Hãy đề xuất một đoạn nội dung thuyết minh bảo tàng số cho hiện vật ${targetArtifactId ?? ''}, bám sát hoàn toàn dữ liệu đã nạp và không suy đoán ngoài tài liệu.`,
+    standardize_description: `Hãy hỗ trợ chuẩn hóa phần mô tả chuyên môn (chất liệu, kích thước, tình trạng, niên đại và căn cứ) cho hiện vật ${targetArtifactId ?? ''} theo chuẩn Dublin Core từ dữ liệu đã nạp.`,
+    missing_info: `Hãy kiểm tra hiện vật ${targetArtifactId ? targetArtifactId : 'hoặc toàn bộ danh sách hồ sơ'} và liệt kê cụ thể các trường thông tin còn thiếu hoặc chưa xác định để tiếp tục tra cứu.`,
+    interview_questions: `Dựa trên các điểm chưa rõ của hiện vật ${targetArtifactId ?? ''}, hãy đề xuất 5 câu hỏi phỏng vấn người thân hoặc câu hỏi xác minh gửi đơn vị lưu giữ.`,
   };
 
-  const selectedAction: GeminiAssistAction = action && action in actionPrompts ? action : 'qa';
+  const selectedAction: GeminiAssistAction =
+    action && action in actionPrompts ? action : 'qa';
   const taskInstruction = actionPrompts[selectedAction];
 
   const userPrompt = [
-    'DỮ LIỆU HỒ SƠ ĐƯỢC PHÉP TRUY CẬP (JSON):',
+    'DỮ LIỆU HỒ SƠ ĐÃ NẠP (JSON):',
     JSON.stringify(artifactsContext, null, 2),
     '',
     'YÊU CẦU:',
@@ -162,7 +206,8 @@ app.post('/api/gemini/assist', async (req, res) => {
       label: 'NỘI DUNG AI ĐỀ XUẤT – CHƯA KIỂM CHỨNG',
     });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Lỗi không xác định từ Gemini API.';
+    const message =
+      err instanceof Error ? err.message : 'Lỗi không xác định từ Gemini API.';
     const status = message.includes('429')
       ? 429
       : message.includes('403') || message.includes('API_KEY')

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   AlertTriangle,
   CheckCircle2,
+  ExternalLink,
   ShieldAlert,
   ShieldCheck,
   ShieldOff,
@@ -17,9 +18,17 @@ import { FamilyArtifact, PermissionStatus } from '../types/artifact';
 import { displayOrPlaceholder } from '../utils/completeness';
 
 export const RightsAndPreservationPage: React.FC = () => {
-  const { realArtifacts, upsertArtifact } = useArchive();
+  const { realArtifacts, permissions, upsertArtifact } = useArchive();
   const [statusFilter, setStatusFilter] = useState<'ALL' | PermissionStatus | 'CONSERVATION'>('ALL');
   const [feedback, setFeedback] = useState<string | null>(null);
+
+  const permissionMap = useMemo(() => {
+    const map = new Map<string, (typeof permissions)[number]>();
+    for (const entry of permissions) {
+      map.set(entry.identifier, entry);
+    }
+    return map;
+  }, [permissions]);
 
   const filteredList = useMemo(() => {
     return realArtifacts.filter((item) => {
@@ -77,14 +86,39 @@ export const RightsAndPreservationPage: React.FC = () => {
       {/* Header */}
       <div className="border-b border-[#70452F]/15 pb-6 space-y-2">
         <p className="text-xs font-medium tracking-wider text-[#70452F] uppercase">
-          Màn hình 7 · Quyền sử dụng tư liệu & Hướng dẫn bảo quản
+          Màn hình 7 · Quyền sử dụng tư liệu (permissions.json) & Hướng dẫn bảo quản
         </p>
         <h1 className="font-editorial text-3xl sm:text-4xl font-semibold text-[#231B15]">
           Quyền Công Bố & Bảo Quản Hiện Vật
         </h1>
         <p className="text-sm text-[#65564A] max-w-3xl">
-          Kiểm soát chặt chẽ sự đồng ý của người giữ kỷ vật. Khi chưa được phép hoặc khi quyền bị thu hồi, hệ thống lập tức ẩn ảnh và thông tin riêng tư khỏi trang công khai.
+          Kiểm soát chặt chẽ sự đồng ý của đơn vị lưu giữ hoặc người giữ kỷ vật. Đối với 15 hiện vật Bảo tàng Bắc Ninh chưa có văn bản cấp phép đăng lại ảnh, hệ thống tuyệt đối không sao chép ảnh về máy chủ và chỉ hiển thị liên kết mở trang nguồn chính thức.
         </p>
+      </div>
+
+      {/* Permissions Summary */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-white rounded-xl border border-[#70452F]/15 p-4">
+          <p className="text-xs text-[#65564A]">Hồ sơ trong bảng quyền (permissions.json)</p>
+          <p className="text-2xl font-semibold text-[#231B15] tabular-nums mt-1">
+            {permissions.length}
+          </p>
+        </div>
+        <div className="bg-white rounded-xl border border-[#70452F]/15 p-4">
+          <p className="text-xs text-[#65564A]">Chưa xác minh quyền đăng lại ảnh</p>
+          <p className="text-2xl font-semibold text-[#70452F] tabular-nums mt-1">
+            {
+              permissions.filter((p) => p.permissionStatus !== 'Đã được phép')
+                .length
+            }
+          </p>
+        </div>
+        <div className="bg-white rounded-xl border border-[#70452F]/15 p-4">
+          <p className="text-xs text-[#65564A]">Đã cấp phép đăng ảnh công khai</p>
+          <p className="text-2xl font-semibold text-[#52624B] tabular-nums mt-1">
+            {realArtifacts.filter((a) => a.permissionStatus === 'Đã được phép').length}
+          </p>
+        </div>
       </div>
 
       {feedback && (
@@ -142,7 +176,9 @@ export const RightsAndPreservationPage: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
-            {filteredList.map((artifact) => (
+            {filteredList.map((artifact) => {
+              const permEntry = permissionMap.get(artifact.identifier);
+              return (
               <article
                 key={artifact.id}
                 className="bg-white rounded-xl border border-[#70452F]/15 p-5 space-y-4"
@@ -249,15 +285,34 @@ export const RightsAndPreservationPage: React.FC = () => {
                     )}
                   </div>
 
-                  <Link
-                    to={`/quan-ly?edit=${encodeURIComponent(artifact.id)}`}
-                    className="font-medium text-[#70452F] hover:underline"
-                  >
-                    Chỉnh sửa chi tiết hồ sơ →
-                  </Link>
+                  <div className="flex flex-wrap items-center gap-4">
+                    {permEntry?.imageRightsStatus && (
+                      <span className="text-[#65564A]">
+                        Ảnh: <strong className="text-[#231B15]">{permEntry.imageRightsStatus}</strong>
+                      </span>
+                    )}
+                    {permEntry?.officialSourceUrl && (
+                      <a
+                        href={permEntry.officialSourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 font-medium text-[#52624B] hover:underline"
+                      >
+                        <span>Trang nguồn gốc</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
+                    <Link
+                      to={`/quan-ly?edit=${encodeURIComponent(artifact.id)}`}
+                      className="font-medium text-[#70452F] hover:underline"
+                    >
+                      Chỉnh sửa chi tiết hồ sơ →
+                    </Link>
+                  </div>
                 </div>
               </article>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>

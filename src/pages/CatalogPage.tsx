@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   Clock,
+  ExternalLink,
   LayoutGrid,
   List,
   Search,
@@ -36,7 +37,7 @@ export const CatalogPage: React.FC = () => {
     searchParams.get('condition') === 'conservation' ? 'CONSERVATION' : 'ALL'
   );
   const [copyTypeFilter, setCopyTypeFilter] = useState('ALL');
-  const [sortBy, setSortBy] = useState<'createdAt' | 'title' | 'date'>('createdAt');
+  const [sortBy, setSortBy] = useState<'identifier' | 'title' | 'date'>('identifier');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showTimelineTab, setShowTimelineTab] = useState(false);
   const [catalogScope, setCatalogScope] = useState<'public' | 'manager'>('public');
@@ -55,6 +56,7 @@ export const CatalogPage: React.FC = () => {
           const hit =
             item.title.toLowerCase().includes(q) ||
             item.identifier.toLowerCase().includes(q) ||
+            item.registrationNumber.toLowerCase().includes(q) ||
             item.material.toLowerCase().includes(q) ||
             item.subject.toLowerCase().includes(q);
           if (!hit) return false;
@@ -95,7 +97,7 @@ export const CatalogPage: React.FC = () => {
           const yb = extractYearFromDateText(b.date) ?? 9999;
           return ya - yb;
         }
-        return b.createdAt.localeCompare(a.createdAt);
+        return a.identifier.localeCompare(b.identifier);
       });
   }, [
     activeViewArtifacts,
@@ -110,7 +112,11 @@ export const CatalogPage: React.FC = () => {
 
   const timelineItems = useMemo(() => {
     return filteredArtifacts
-      .filter((a) => a.verificationStatus === 'Đã kiểm chứng')
+      .filter(
+        (a) =>
+          a.verificationStatus === 'Đã xác minh' ||
+          a.verificationStatus === 'Đã kiểm chứng'
+      )
       .map((a) => ({ artifact: a, year: extractYearFromDateText(a.date) }))
       .sort((a, b) => (a.year ?? 9999) - (b.year ?? 9999));
   }, [filteredArtifacts]);
@@ -126,13 +132,13 @@ export const CatalogPage: React.FC = () => {
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[#70452F]/15 pb-6">
         <div className="space-y-1.5">
           <p className="text-xs font-medium tracking-wider text-[#70452F] uppercase">
-            Màn hình 2 · Tra cứu bộ sưu tập
+            Màn hình 2 · Tra cứu danh mục 15 hiện vật
           </p>
           <h1 className="font-editorial text-3xl sm:text-4xl font-semibold text-[#231B15]">
-            Kho Kỷ Vật Gia Đình
+            Kho Hiện Vật & Kỷ Vật Bắc Ninh
           </h1>
           <p className="text-sm text-[#65564A]">
-            Trang công khai chỉ hiển thị các kỷ vật đã được cấp quyền công bố.
+            Hiển thị hồ sơ đã đối chiếu nguồn tại Bảo tàng Bắc Ninh. Ảnh chưa cấp phép đăng lại được thay bằng liên kết mở trang nguồn chính thức.
           </p>
         </div>
 
@@ -148,7 +154,7 @@ export const CatalogPage: React.FC = () => {
                     : 'text-[#65564A] hover:text-[#231B15]'
                 }`}
               >
-                Bản công khai
+                Hồ sơ công khai
               </button>
               <button
                 type="button"
@@ -174,7 +180,7 @@ export const CatalogPage: React.FC = () => {
             }`}
           >
             <Clock className="w-4 h-4" />
-            <span>Dòng thời gian đã kiểm chứng</span>
+            <span>Dòng thời gian đã xác minh</span>
           </button>
         </div>
       </div>
@@ -188,19 +194,19 @@ export const CatalogPage: React.FC = () => {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Tìm theo tên kỷ vật hoặc mã định danh (C03-00001)..."
+              placeholder="Tìm theo tên, mã C03-00001 hoặc số kiểm kê BTBN..."
               className="w-full h-10 pl-10 pr-3 rounded-lg bg-[#F8F4EC]/60 border border-[#70452F]/20 text-sm focus:outline-none focus:ring-2 focus:ring-[#C59A54]"
             />
           </div>
 
           <div className="md:col-span-3">
             <select
-              aria-label="Lọc theo loại kỷ vật"
+              aria-label="Lọc theo phân loại"
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full h-10 px-3 rounded-lg bg-white border border-[#70452F]/20 text-sm focus:outline-none focus:ring-2 focus:ring-[#C59A54]"
+              className="w-full h-10 px-3 rounded-lg bg-white border border-[#70452F]/20 text-sm"
             >
-              <option value="ALL">Tất cả loại kỷ vật</option>
+              <option value="ALL">Tất cả phân loại</option>
               {ARTIFACT_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
@@ -214,7 +220,7 @@ export const CatalogPage: React.FC = () => {
               aria-label="Lọc theo thời gian"
               value={eraFilter}
               onChange={(e) => setEraFilter(e.target.value)}
-              className="w-full h-10 px-3 rounded-lg bg-white border border-[#70452F]/20 text-sm focus:outline-none focus:ring-2 focus:ring-[#C59A54]"
+              className="w-full h-10 px-3 rounded-lg bg-white border border-[#70452F]/20 text-sm"
             >
               <option value="ALL">Mọi thời kỳ</option>
               <option value="BEFORE_1975">Trước năm 1975</option>
@@ -257,7 +263,7 @@ export const CatalogPage: React.FC = () => {
             aria-label="Lọc theo tình trạng bảo quản"
             value={conditionFilter}
             onChange={(e) => setConditionFilter(e.target.value)}
-            className="h-9 px-3 rounded-lg bg-white border border-[#70452F]/20 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#C59A54]"
+            className="h-9 px-3 rounded-lg bg-white border border-[#70452F]/20 text-xs sm:text-sm"
           >
             <option value="ALL">Mọi tình trạng bảo quản</option>
             <option value="CONSERVATION">Cần ưu tiên bảo quản (Hư hại nhẹ / nặng)</option>
@@ -272,7 +278,7 @@ export const CatalogPage: React.FC = () => {
             aria-label="Lọc theo loại bản hiển thị"
             value={copyTypeFilter}
             onChange={(e) => setCopyTypeFilter(e.target.value)}
-            className="h-9 px-3 rounded-lg bg-white border border-[#70452F]/20 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#C59A54]"
+            className="h-9 px-3 rounded-lg bg-white border border-[#70452F]/20 text-xs sm:text-sm"
           >
             <option value="ALL">Mọi loại bản hiển thị</option>
             {DISPLAYED_COPY_TYPES.map((t) => (
@@ -286,84 +292,62 @@ export const CatalogPage: React.FC = () => {
             aria-label="Sắp xếp danh sách"
             value={sortBy}
             onChange={(e) =>
-              setSortBy(e.target.value as 'createdAt' | 'title' | 'date')
+              setSortBy(e.target.value as 'identifier' | 'title' | 'date')
             }
-            className="h-9 px-3 rounded-lg bg-white border border-[#70452F]/20 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#C59A54]"
+            className="h-9 px-3 rounded-lg bg-white border border-[#70452F]/20 text-xs sm:text-sm"
           >
-            <option value="createdAt">Sắp xếp: Ngày nhập mới nhất</option>
-            <option value="title">Sắp xếp: Tên kỷ vật (A–Z)</option>
+            <option value="identifier">Sắp xếp: Mã C03-00001 → C03-00015</option>
+            <option value="title">Sắp xếp: Tên hiện vật (A–Z)</option>
             <option value="date">Sắp xếp: Niên đại</option>
           </select>
         </div>
       </section>
 
-      {/* Timeline View if enabled */}
       {showTimelineTab && (
         <section className="bg-white rounded-2xl border border-[#70452F]/15 p-6 space-y-4">
           <h2 className="font-editorial text-xl font-semibold text-[#231B15]">
-            Dòng thời gian kỷ vật có niên đại đã kiểm chứng ({timelineItems.length})
+            Dòng thời gian hiện vật đã xác minh ({timelineItems.length})
           </h2>
-          {timelineItems.length === 0 ? (
-            <p className="text-sm text-[#65564A]">
-              Chưa có kỷ vật nào trong bộ lọc hiện tại đạt trạng thái “Đã kiểm chứng” niên đại.
-            </p>
-          ) : (
-            <ol className="space-y-3 border-t border-[#70452F]/10 pt-4">
-              {timelineItems.map(({ artifact }) => (
-                <li
-                  key={artifact.id}
-                  className="flex flex-wrap items-center justify-between gap-3 py-2.5 border-b border-[#70452F]/10 last:border-b-0"
-                >
-                  <div className="space-y-0.5">
-                    <div className="text-xs font-mono text-[#70452F] tabular-nums">
-                      {artifact.date} · {artifact.identifier}
-                    </div>
-                    <Link
-                      to={`/ky-vat/${encodeURIComponent(artifact.id)}`}
-                      className="text-sm font-semibold text-[#231B15] hover:text-[#70452F] hover:underline"
-                    >
-                      {artifact.title}
-                    </Link>
+          <ol className="space-y-3 border-t border-[#70452F]/10 pt-4">
+            {timelineItems.map(({ artifact }) => (
+              <li
+                key={artifact.id}
+                className="flex flex-wrap items-center justify-between gap-3 py-2.5 border-b border-[#70452F]/10 last:border-b-0"
+              >
+                <div className="space-y-0.5">
+                  <div className="text-xs font-mono text-[#70452F] tabular-nums">
+                    {artifact.identifier} · {artifact.registrationNumber} · {artifact.date}
                   </div>
-                  <span className="text-xs text-[#65564A]">
-                    {artifact.displayedCopyType} · {artifact.artifactCategory}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          )}
+                  <Link
+                    to={`/ky-vat/${encodeURIComponent(artifact.id)}`}
+                    className="text-sm font-semibold text-[#231B15] hover:text-[#70452F] hover:underline"
+                  >
+                    {artifact.title}
+                  </Link>
+                </div>
+                <span className="text-xs text-[#65564A]">
+                  {artifact.currentStorageLocation}
+                </span>
+              </li>
+            ))}
+          </ol>
         </section>
       )}
 
-      {/* Result Count */}
-      <div className="flex items-center justify-between text-xs text-[#65564A]">
-        <span className="tabular-nums">
-          Đang hiển thị {filteredArtifacts.length} kỷ vật
-          {effectiveScope === 'public' ? ' (đã được phép công bố)' : ' (bao gồm hồ sơ nội bộ)'}
-        </span>
+      <div className="text-xs text-[#65564A] tabular-nums">
+        Đang hiển thị {filteredArtifacts.length} hồ sơ hiện vật
       </div>
 
-      {/* Main Grid / List */}
       {isLoading ? (
         <SkeletonCards count={6} />
       ) : filteredArtifacts.length === 0 ? (
         <div className="bg-white rounded-2xl border border-[#70452F]/15 p-10 text-center space-y-3">
           <p className="font-editorial text-xl font-semibold text-[#231B15]">
-            Không tìm thấy kỷ vật phù hợp
+            Không tìm thấy hồ sơ phù hợp
           </p>
-          <p className="text-sm text-[#65564A] max-w-lg mx-auto">
-            {effectiveScope === 'public'
-              ? 'Chỉ các hồ sơ có trạng thái quyền “Đã được phép” và không ở dạng bản nháp mới xuất hiện công khai. Bạn có thể thêm hồ sơ mới hoặc chuyển sang chế độ Quản lý để kiểm tra.'
-              : 'Thử xóa bớt bộ lọc tìm kiếm hoặc thêm hồ sơ kỷ vật mới.'}
+          <p className="text-sm text-[#65564A]">
+            Hãy thử xóa bớt bộ lọc tìm kiếm.
           </p>
-          <div className="pt-2">
-            <Link
-              to="/quan-ly?new=1"
-              className="inline-flex items-center px-4 py-2 rounded-lg bg-[#70452F] text-white text-sm font-medium hover:bg-[#543220]"
-            >
-              Thêm kỷ vật mới
-            </Link>
-          </div>
         </div>
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -371,6 +355,10 @@ export const CatalogPage: React.FC = () => {
             const permittedPhotos = getPublicPermittedImages(artifact);
             const cover = permittedPhotos[0];
             const completeness = evaluateArtifactCompleteness(artifact);
+            const officialUrl =
+              artifact.referenceSources[0]?.urlOrCode ||
+              artifact.imageSources[0] ||
+              'https://www.baotangbacninh.vn/ds-hien-vat';
 
             return (
               <article
@@ -386,15 +374,17 @@ export const CatalogPage: React.FC = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <ArtifactPlaceholder className="w-full h-full border-0" />
+                    <ArtifactPlaceholder
+                      className="w-full h-full border-0"
+                      reason="Chưa xác minh quyền đăng lại ảnh"
+                    />
                   )}
                 </div>
 
                 <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                   <div className="space-y-2">
                     <div className="text-xs font-mono text-[#70452F] tabular-nums">
-                      {artifact.identifier} · {artifact.displayedCopyType}
-                      {artifact.isDemo ? ' · Dữ liệu minh họa, không dùng nghiệm thu' : ''}
+                      {artifact.identifier} · {artifact.registrationNumber}
                     </div>
                     <h2 className="font-editorial text-xl font-semibold text-[#231B15] line-clamp-2">
                       {displayOrPlaceholder(artifact.title)}
@@ -402,59 +392,71 @@ export const CatalogPage: React.FC = () => {
                     <dl className="space-y-1 text-xs text-[#65564A] pt-1">
                       <div className="flex justify-between gap-2">
                         <dt>Niên đại:</dt>
-                        <dd className="font-medium text-[#231B15] text-right">
+                        <dd className="font-medium text-[#231B15] text-right truncate max-w-[65%]">
                           {displayOrPlaceholder(artifact.date)}
                         </dd>
                       </div>
                       <div className="flex justify-between gap-2">
                         <dt>Chất liệu:</dt>
-                        <dd className="font-medium text-[#231B15] text-right truncate max-w-[60%]">
+                        <dd className="font-medium text-[#231B15] text-right truncate max-w-[65%]">
                           {displayOrPlaceholder(artifact.material)}
                         </dd>
                       </div>
                       <div className="flex justify-between gap-2">
-                        <dt>Loại kỷ vật:</dt>
-                        <dd className="font-medium text-[#231B15] text-right truncate max-w-[60%]">
-                          {displayOrPlaceholder(artifact.artifactCategory)}
-                        </dd>
-                      </div>
-                      <div className="flex justify-between gap-2">
-                        <dt>Tình trạng gốc:</dt>
+                        <dt>Loại bản:</dt>
                         <dd className="font-medium text-[#231B15] text-right">
-                          {artifact.originalCondition}
+                          {artifact.displayedCopyType}
                         </dd>
                       </div>
                       <div className="flex justify-between gap-2">
                         <dt>Nơi lưu giữ:</dt>
-                        <dd className="font-medium text-[#231B15] text-right truncate max-w-[60%]">
-                          {artifact.permissionStatus === 'Đã được phép'
-                            ? displayOrPlaceholder(artifact.currentStorageLocation)
-                            : 'Ẩn theo quyền bảo mật'}
+                        <dd className="font-medium text-[#231B15] text-right truncate max-w-[65%]">
+                          {artifact.currentStorageLocation}
+                        </dd>
+                      </div>
+                      <div className="flex justify-between gap-2">
+                        <dt>Kiểm chứng:</dt>
+                        <dd className="font-medium text-[#52624B] text-right">
+                          {artifact.verificationStatus}
                         </dd>
                       </div>
                     </dl>
                   </div>
 
-                  <div className="pt-3 border-t border-[#70452F]/10 flex items-center justify-between gap-2 text-xs">
-                    <span
-                      className={`inline-flex items-center gap-1 font-medium ${
-                        artifact.permissionStatus === 'Đã được phép'
-                          ? 'text-[#52624B]'
-                          : 'text-[#70452F]'
-                      }`}
-                    >
-                      {artifact.permissionStatus === 'Đã được phép' ? (
-                        <ShieldCheck className="w-3.5 h-3.5" />
-                      ) : (
-                        <ShieldAlert className="w-3.5 h-3.5" />
-                      )}
-                      {artifact.permissionStatus}
-                    </span>
+                  <div className="pt-3 border-t border-[#70452F]/10 space-y-2 text-xs">
+                    <div className="flex items-center justify-between gap-2">
+                      <span
+                        className={`inline-flex items-center gap-1 font-medium ${
+                          artifact.permissionStatus === 'Đã được phép'
+                            ? 'text-[#52624B]'
+                            : 'text-[#70452F]'
+                        }`}
+                      >
+                        {artifact.permissionStatus === 'Đã được phép' ? (
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                        ) : (
+                          <ShieldAlert className="w-3.5 h-3.5" />
+                        )}
+                        {artifact.permissionStatus === 'Đã được phép'
+                          ? 'Đã cấp phép ảnh'
+                          : 'Chưa cấp phép ảnh'}
+                      </span>
 
-                    <div className="flex items-center gap-3">
                       <span className="text-[#65564A] tabular-nums">
                         {completeness.percentage}%
                       </span>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2">
+                      <a
+                        href={officialUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[#52624B] hover:underline"
+                      >
+                        <span>Trang nguồn chính thức</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
                       <Link
                         to={`/ky-vat/${encodeURIComponent(artifact.id)}`}
                         className="font-semibold text-[#70452F] hover:underline whitespace-nowrap"
@@ -473,7 +475,6 @@ export const CatalogPage: React.FC = () => {
           {filteredArtifacts.map((artifact) => {
             const permittedPhotos = getPublicPermittedImages(artifact);
             const cover = permittedPhotos[0];
-            const completeness = evaluateArtifactCompleteness(artifact);
             return (
               <article
                 key={artifact.id}
@@ -491,23 +492,22 @@ export const CatalogPage: React.FC = () => {
                     ) : (
                       <ArtifactPlaceholder
                         compact
-                        reason="Chưa có ảnh"
+                        reason="Chưa cấp phép ảnh"
                         className="w-full h-full border-0 text-[10px]"
                       />
                     )}
                   </div>
                   <div className="space-y-1 min-w-0">
                     <p className="text-xs font-mono text-[#70452F] tabular-nums">
-                      {artifact.identifier} · {artifact.displayedCopyType} ·{' '}
-                      {artifact.permissionStatus}
+                      {artifact.identifier} · {artifact.registrationNumber} ·{' '}
+                      {artifact.verificationStatus}
                     </p>
                     <h2 className="font-editorial text-lg font-semibold text-[#231B15] truncate">
                       {displayOrPlaceholder(artifact.title)}
                     </h2>
                     <p className="text-xs text-[#65564A]">
-                      Niên đại: {displayOrPlaceholder(artifact.date)} · Chất liệu:{' '}
-                      {displayOrPlaceholder(artifact.material)} · Tình trạng:{' '}
-                      {artifact.originalCondition} · Hoàn thiện: {completeness.percentage}%
+                      {artifact.currentStorageLocation} · Chất liệu:{' '}
+                      {displayOrPlaceholder(artifact.material)} · {artifact.displayedCopyType}
                     </p>
                   </div>
                 </div>

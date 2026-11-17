@@ -8,11 +8,14 @@ export type OriginalCondition =
   | 'Tốt'
   | 'Hư hại nhẹ'
   | 'Hư hại nặng'
-  | 'Không rõ';
+  | 'Không rõ'
+  | 'Không rõ – nguồn chưa công bố tình trạng';
 
 export type VerificationStatus =
+  | 'Đã xác minh'
   | 'Đã kiểm chứng'
   | 'Chưa kiểm chứng'
+  | 'Chưa xác định'
   | 'Chưa xác định được';
 
 export type PermissionStatus =
@@ -63,16 +66,17 @@ export interface ArtifactImageFile {
 export interface ArtifactSourceDetail {
   id: string;
   sourceName: string;
-  sourceType: string; // Khảo sát gia đình | Văn bản chính thống | Sách / Tài liệu | Phỏng vấn | Khác
+  sourceType: string;
   authorOrProvider: string;
   recordedDate: string;
   urlOrCode: string;
   verifiedContent: string;
   isOfficial?: boolean;
+  extractedText?: string;
 }
 
 export interface FamilyArtifact {
-  id: string; // Same as identifier (e.g., C03-00001) or demo ID
+  id: string;
 
   // 15 Dublin Core Core Elements
   title: string;
@@ -129,6 +133,7 @@ export interface FamilyArtifact {
   // Workflow metadata
   isDraft?: boolean;
   isDemo?: boolean;
+  isPackagedPublic?: boolean;
   aiDraftNotes?: string;
 }
 
@@ -141,21 +146,41 @@ export interface FamilyArchiveProfile {
   updatedAt: string;
 }
 
+export type SourceCategory = 'A' | 'B' | 'C';
+
 export interface ReferenceSourceRegistryItem {
   id: string;
   sourceName: string;
   sourceType: 'Cơ quan chính thống' | 'Chuẩn quốc tế' | 'Khảo sát thực tế từ gia đình' | 'Sách / Tài liệu khác';
+  sourceCategory: SourceCategory;
+  publisher: string;
   isOfficial: boolean;
+  isVerified: boolean;
   isPreSuggested: boolean;
   url: string;
+  publishedDate: string;
+  accessedDate: string;
   authorOrProvider: string;
   role: string;
   surveyDate: string;
   artifactName: string;
   verifiedContent: string;
+  extractedText?: string;
   allowedScope: string;
   verificationNote: string;
   linkedArtifactIds: string[];
+}
+
+export interface PermissionRegistryEntry {
+  identifier: string;
+  registrationNumber: string;
+  custodian: string;
+  rightsHolder: string;
+  permissionStatus: PermissionStatus;
+  imageRightsStatus: string;
+  permissionScope: string;
+  restrictedContent: string;
+  officialSourceUrl: string;
 }
 
 export interface BlankIntakeTemplate {
