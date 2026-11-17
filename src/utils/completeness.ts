@@ -1,0 +1,157 @@
+import { DUBLIN_CORE_FIELDS } from '../data/constants';
+import { FamilyArtifact } from '../types/artifact';
+
+export interface CompletenessReport {
+  dublinCoreFilled: number;
+  dublinCoreTotal: number;
+  isDublinCoreComplete: boolean;
+  overallFilled: number;
+  overallTotal: number;
+  percentage: number;
+  missingFields: string[];
+  hasSufficientSources: boolean;
+  hasPermission: boolean;
+  needsConservation: boolean;
+}
+
+const REQUIRED_EXTENDED_LABELS: Array<{ key: keyof FamilyArtifact; label: string }> = [
+  { key: 'material', label: 'Chất liệu' },
+  { key: 'dimensions', label: 'Kích thước' },
+  { key: 'artifactCategory', label: 'Loại kỷ vật' },
+  { key: 'currentStorageLocation', label: 'Nơi lưu giữ hiện tại' },
+  { key: 'displayedCopyType', label: 'Loại bản hiển thị' },
+  { key: 'originalCondition', label: 'Tình trạng bản gốc' },
+  { key: 'familyStory', label: 'Câu chuyện gia đình' },
+  { key: 'storyTeller', label: 'Người kể chuyện' },
+  { key: 'permissionGrantedBy', label: 'Người cho phép công bố' },
+  { key: 'permissionScope', label: 'Phạm vi được phép sử dụng' },
+];
+
+export function evaluateArtifactCompleteness(artifact: FamilyArtifact): CompletenessReport {
+  const missingFields: string[] = [];
+
+  let dcFilled = 0;
+  for (const field of DUBLIN_CORE_FIELDS) {
+    const val = String(artifact[field.key] ?? '').trim();
+    if (val.length > 0 && val.toLowerCase() !== 'chưa cập nhật') {
+      dcFilled += 1;
+    } else {
+      missingFields.push(field.labelVi);
+    }
+  }
+
+  let extFilled = 0;
+  for (const item of REQUIRED_EXTENDED_LABELS) {
+    const val = String(artifact[item.key] ?? '').trim();
+    if (val.length > 0 && val.toLowerCase() !== 'chưa cập nhật') {
+      extFilled += 1;
+    } else {
+      missingFields.push(item.label);
+    }
+  }
+
+  const hasSources = (artifact.referenceSources?.length ?? 0) >= 2;
+  if (!hasSources) {
+    missingFields.push('Tối thiểu 2 nguồn đối chiếu');
+  }
+
+  const hasImages = (artifact.imageFiles?.length ?? 0) >= 1;
+  if (!hasImages) {
+    missingFields.push('Ảnh chụp kỷ vật thật');
+  }
+
+  const totalItems = DUBLIN_CORE_FIELDS.length + REQUIRED_EXTENDED_LABELS.length + 2;
+  const filledItems = dcFilled + extFilled + (hasSources ? 1 : 0) + (hasImages ? 1 : 0);
+  const percentage = Math.round((filledItems / totalItems) * 100);
+
+  return {
+    dublinCoreFilled: dcFilled,
+    dublinCoreTotal: DUBLIN_CORE_FIELDS.length,
+    isDublinCoreComplete: dcFilled === DUBLIN_CORE_FIELDS.length,
+    overallFilled: filledItems,
+    overallTotal: totalItems,
+    percentage,
+    missingFields,
+    hasSufficientSources: hasSources,
+    hasPermission: artifact.permissionStatus === 'Đã được phép',
+    needsConservation:
+      artifact.originalCondition === 'Hư hại nhẹ' ||
+      artifact.originalCondition === 'Hư hại nặng',
+  };
+}
+
+export function isArtifactPubliclyVisible(artifact: FamilyArtifact): boolean {
+  return artifact.permissionStatus === 'Đã được phép' && !artifact.isDraft;
+}
+
+export function getPublicPermittedImages(artifact: FamilyArtifact) {
+  if (artifact.permissionStatus !== 'Đã được phép') {
+    return [];
+  }
+  return artifact.imageFiles.filter((img) => img.isPermittedForPublic);
+}
+
+export function sanitizeArtifactForPublic(artifact: FamilyArtifact): FamilyArtifact {
+  const permittedImages = getPublicPermittedImages(artifact);
+  const hasRestricted = Boolean(artifact.restrictedContent?.trim());
+
+  return {
+    ...artifact,
+    currentStorageLocation:
+      artifact.permissionStatus === 'Đã được phép'
+        ? artifact.currentStorageLocation || 'Chưa cập nhật'
+        : 'Thông tin hạn chế công bố',
+    restrictedContent: hasRestricted
+      ? 'Đã ẩn nội dung hạn chế theo yêu cầu của người giữ kỷ vật'
+      : '',
+    imageFiles: permittedImages,
+    imageCaptions: permittedImages.map((img) => img.caption),
+    imageSources: permittedImages.map((img) => img.photographerOrSource),
+  };
+}
+
+export function sanitizeArtifactsForGemini(artifacts: FamilyArtifact[]) {
+  return artifacts
+    .filter((a) => a.permissionStatus === 'Đã được phép')
+    .map((a) => ({
+      identifier: a.identifier,
+      title: a.title || 'Chưa cập nhật',
+      creator: a.creator || 'Chưa cập nhật',
+      subject: a.subject || 'Chưa cập nhật',
+      description: a.description || 'Chưa cập nhật',
+      date: a.date || 'Chưa cập nhật',
+      type: a.type || 'Chưa cập nhật',
+      material: a.material || 'Chưa cập nhật',
+      dimensions: a.dimensions || 'Chưa cập nhật',
+      artifactCategory: a.artifactCategory || 'Chưa cập nhật',
+      originalCondition: a.originalCondition,
+      displayedCopyType: a.displayedCopyType,
+      currentStorageLocation: a.currentStorageLocation || 'Chưa cập nhật',
+      historicalStorageLocation: a.historicalStorageLocation || 'Chưa cập nhật',
+      familyStory: a.familyStory || 'Chưa cập nhật',
+      storyTeller: a.storyTeller || 'Chưa cập nhật',
+      storyRecordedDate: a.storyRecordedDate || 'Chưa cập nhật',
+      storyVerificationStatus: a.storyVerificationStatus,
+      acquisitionHistory: a.acquisitionHistory || 'Chưa cập nhật',
+      permissionStatus: a.permissionStatus,
+      permissionScope: a.permissionScope || 'Chưa cập nhật',
+      verificationStatus: a.verificationStatus,
+      unresolvedQuestions: a.unresolvedQuestions || 'Không có',
+      sourcesSummary:
+        a.referenceSources.length > 0
+          ? a.referenceSources
+              .map((s) => `${s.sourceName} (${s.sourceType} - ${s.authorOrProvider})`)
+              .join('; ')
+          : a.source || 'Chưa cập nhật nguồn đối chiếu',
+    }));
+}
+
+export function extractYearFromDateText(dateText: string): number | null {
+  const match = /\b(18\d{2}|19\d{2}|20\d{2})\b/.exec(dateText);
+  return match ? parseInt(match[1], 10) : null;
+}
+
+export function displayOrPlaceholder(value?: string | null): string {
+  const trimmed = value?.trim();
+  return trimmed && trimmed.length > 0 ? trimmed : 'Chưa cập nhật';
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Hồ Sơ Kỷ Vật Gia Đình (Family Heritage Archive - C03)",
+  "description": "Bảo tàng số lưu giữ, lập hồ sơ chuẩn Dublin Core và giới thiệu kỷ vật gia đình. Dự án xã hội phi lợi nhuận (Mã đề tài C03).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
