@@ -48,6 +48,7 @@ interface ArchiveContextValue {
   isPublicPreview: boolean;
   setIsPublicPreview: (val: boolean) => void;
   geminiHealth: GeminiHealthStatus | null;
+  refreshGeminiHealth: (liveVerify?: boolean) => Promise<GeminiHealthStatus>;
   realStats: {
     totalReal: number;
     verifiedCount: number;
@@ -176,12 +177,16 @@ export const ArchiveProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
+  const refreshGeminiHealth = useCallback(async (liveVerify = false) => {
+    const status = await checkGeminiHealth(liveVerify);
+    setGeminiHealth(status);
+    return status;
+  }, []);
+
   useEffect(() => {
     void refreshAll();
-    checkGeminiHealth()
-      .then(setGeminiHealth)
-      .catch(() => setGeminiHealth({ configured: false, model: 'gemini-4-hydrogen' }));
-  }, [refreshAll]);
+    void refreshGeminiHealth(false);
+  }, [refreshAll, refreshGeminiHealth]);
 
   const upsertArtifact = useCallback(
     async (artifact: FamilyArtifact) => {
@@ -313,6 +318,7 @@ export const ArchiveProvider: React.FC<{ children: React.ReactNode }> = ({
     isPublicPreview,
     setIsPublicPreview,
     geminiHealth,
+    refreshGeminiHealth,
     realStats,
     sourceStats,
     refreshAll,

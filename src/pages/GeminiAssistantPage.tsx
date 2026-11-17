@@ -3,12 +3,18 @@ import {
   AlertTriangle,
   Bot,
   CheckCircle2,
+  RefreshCw,
   Send,
   ShieldCheck,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useArchive } from '../context/ArchiveContext';
-import { GeminiActionType, requestGeminiAssist } from '../services/geminiService';
+import {
+  GeminiActionType,
+  GeminiClientError,
+  GeminiClientStatus,
+  requestGeminiAssist,
+} from '../services/geminiService';
 import { isArtifactPubliclyVisible } from '../utils/completeness';
 
 const ACTION_OPTIONS: Array<{
@@ -20,13 +26,13 @@ const ACTION_OPTIONS: Array<{
   {
     id: 'qa',
     label: '1. Hỏi đáp bộ sưu tập',
-    desc: 'Trả lời câu hỏi dựa trên các hồ sơ đã được phép truy cập.',
+    desc: 'Trả lời câu hỏi dựa trên 15 hồ sơ hiện vật được phép sử dụng.',
     needsTarget: false,
   },
   {
     id: 'summarize_story',
     label: '2. Tóm tắt câu chuyện',
-    desc: 'Tóm tắt súc tích câu chuyện gắn với một kỷ vật cụ thể.',
+    desc: 'Tóm tắt súc tích câu chuyện gắn với một hiện vật cụ thể.',
     needsTarget: true,
   },
   {
@@ -50,7 +56,7 @@ const ACTION_OPTIONS: Array<{
   {
     id: 'interview_questions',
     label: '6. Câu hỏi phỏng vấn',
-    desc: 'Đề xuất câu hỏi lễ phép để phỏng vấn ông bà, người thân.',
+    desc: 'Đề xuất câu hỏi lễ phép để phỏng vấn người thân hoặc đơn vị lưu giữ.',
     needsTarget: true,
   },
 ];
@@ -62,44 +68,66 @@ const EXAMPLE_PROMPTS = [
   'C03-00010 và C03-00011 có nguồn xác minh từ đâu?',
 ];
 
+const DIAGNOSTIC_STATUS_LABELS: Record<GeminiClientStatus, string> = {
+  connected: 'Kết nối thành công',
+  ready: 'Sẵn sàng (đã có khóa trên máy chủ)',
+  not_configured: 'API key chưa cấu hình',
+  invalid_key: 'API key không hợp lệ',
+  permission_denied: 'Không có quyền gọi model',
+  rate_limited: 'Vượt giới hạn sử dụng',
+  network_error: 'Lỗi kết nối',
+  server_error: 'Lỗi phản hồi máy chủ',
+  endpoint_unreachable: 'Chưa tìm thấy API backend (/api/gemini)',
+};
+
 export const GeminiAssistantPage: React.FC = () => {
-  const { activeViewArtifacts, geminiHealth, upsertArtifact } = useArchive();
+  const { realArtifacts, geminiHealth, refreshGeminiHealth, upsertArtifact } =
+    useArchive();
 
   const permittedArtifacts = useMemo(
-    () => activeViewArtifacts.filter(isArtifactPubliclyVisible),
-    [activeViewArtifacts]
+    () => realArtifacts.filter(isArtifactPubliclyVisible).slice(0, 15),
+    [realArtifacts]
   );
 
   const [action, setAction] = useState<GeminiActionType>('qa');
   const [targetId, setTargetId] = useState<string>('');
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [checkingHealth, setCheckingHealth] = useState(false);
+  const [error, setError] = useState<{
+    message: string;
+    httpStatus?: number;
+    status?: GeminiClientStatus;
+  } | null>(null);
   const [aiResponse, setAiResponse] = useState<string>('');
   const [editedOutput, setEditedOutput] = useState<string>('');
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   const selectedActionMeta = ACTION_OPTIONS.find((a) => a.id === action)!;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const runAssistRequest = async () => {
     setError(null);
     setSaveMessage(null);
 
     if (permittedArtifacts.length === 0) {
-      setError(
-        'Hiện chưa có hồ sơ công khai nào hợp lệ để truy vấn. Hệ thống chỉ gửi siêu dữ liệu đã xác minh hoặc hồ sơ đã được cấp quyền.'
-      );
+      setError({
+        message:
+          'Hiện chưa có hồ sơ công khai nào hợp lệ để truy vấn. Hệ thống chỉ gửi siêu dữ liệu đã xác minh hoặc hồ sơ đã được cấp quyền.',
+      });
       return;
     }
 
     if (selectedActionMeta.needsTarget && !targetId) {
-      setError('Vui lòng chọn một kỷ vật cụ thể để thực hiện tác vụ này.');
+      setError({
+        message: 'Vui lòng chọn một hiện vật cụ thể để thực hiện tác vụ này.',
+      });
       return;
     }
 
     if (action === 'qa' && !question.trim()) {
-      setError('Vui lòng nhập câu hỏi của bạn.');
+      setError({
+        message: 'Vui lòng nhập câu hỏi của bạn.',
+      });
       return;
     }
 
@@ -114,13 +142,36 @@ export const GeminiAssistantPage: React.FC = () => {
       setAiResponse(res.text);
       setEditedOutput(res.text);
     } catch (err: unknown) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Không thể kết nối đến máy chủ Gemini AI.'
-      );
+      if (err instanceof GeminiClientError) {
+        setError({
+          message: err.message,
+          httpStatus: err.httpStatus,
+          status: err.status,
+        });
+      } else {
+        setError({
+          message:
+            err instanceof Error
+              ? err.message
+              : 'Không thể kết nối đến máy chủ Gemini AI.',
+        });
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await runAssistRequest();
+  };
+
+  const handleLiveHealthCheck = async () => {
+    setCheckingHealth(true);
+    try {
+      await refreshGeminiHealth(true);
+    } finally {
+      setCheckingHealth(false);
     }
   };
 
@@ -128,11 +179,11 @@ export const GeminiAssistantPage: React.FC = () => {
     const chosenId = targetId || permittedArtifacts[0]?.identifier;
     const target = permittedArtifacts.find((a) => a.identifier === chosenId);
     if (!target) {
-      setError('Vui lòng chọn hồ sơ thật cần lưu ghi chú đề xuất.');
+      setError({ message: 'Vui lòng chọn hồ sơ thật cần lưu ghi chú đề xuất.' });
       return;
     }
     if (target.isDemo) {
-      setError('Không thể lưu kết quả vào bản ghi DEMO minh họa.');
+      setError({ message: 'Không thể lưu kết quả vào bản ghi DEMO minh họa.' });
       return;
     }
     await upsertArtifact({
@@ -144,6 +195,10 @@ export const GeminiAssistantPage: React.FC = () => {
       `Đã lưu nội dung đã chỉnh sửa vào ghi chú quản lý của hồ sơ ${target.identifier} (chưa tự động công bố).`
     );
   };
+
+  const healthStatusKey: GeminiClientStatus =
+    geminiHealth?.status ?? (geminiHealth?.configured ? 'ready' : 'not_configured');
+  const isHealthOk = Boolean(geminiHealth?.ok ?? geminiHealth?.configured);
 
   return (
     <motion.div
@@ -161,7 +216,7 @@ export const GeminiAssistantPage: React.FC = () => {
           TRỢ LÝ KÝ ỨC GIA ĐÌNH
         </h1>
         <p className="text-sm text-[#65564A] max-w-3xl">
-          Hỗ trợ tra cứu bộ sưu tập, tóm tắt câu chuyện, đề xuất thuyết minh và gợi ý thông tin còn thiếu dựa hoàn toàn trên các hồ sơ đã xác minh hoặc được phép công bố.
+          Hỗ trợ tra cứu bộ sưu tập, tóm tắt câu chuyện, đề xuất thuyết minh và gợi ý thông tin còn thiếu dựa hoàn toàn trên {permittedArtifacts.length} hồ sơ hiện vật được phép sử dụng.
         </p>
       </div>
 
@@ -169,27 +224,40 @@ export const GeminiAssistantPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div
           className={`p-4 rounded-xl border text-xs sm:text-sm ${
-            geminiHealth?.configured
+            isHealthOk
               ? 'bg-[#52624B]/10 border-[#52624B]/30 text-[#2E3B29]'
               : 'bg-amber-50 border-amber-300 text-amber-900'
           }`}
         >
           <div className="flex items-start gap-2.5">
-            {geminiHealth?.configured ? (
+            {isHealthOk ? (
               <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />
             ) : (
               <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
             )}
-            <div className="space-y-1">
-              <p className="font-semibold">
-                {geminiHealth?.configured
-                  ? `Máy chủ Gemini đã sẵn sàng (${geminiHealth.model})`
-                  : 'Tính năng Gemini chưa được cấu hình khóa API trên máy chủ'}
-              </p>
+            <div className="space-y-2 flex-1">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="font-semibold">
+                  {DIAGNOSTIC_STATUS_LABELS[healthStatusKey]}
+                  {geminiHealth?.model ? ` (${geminiHealth.model})` : ''}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleLiveHealthCheck}
+                  disabled={checkingHealth}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-current/25 text-xs font-medium hover:bg-black/5 disabled:opacity-60"
+                >
+                  <RefreshCw
+                    className={`w-3 h-3 ${checkingHealth ? 'animate-spin' : ''}`}
+                  />
+                  <span>
+                    {checkingHealth ? 'Đang kiểm tra...' : 'Kiểm tra kết nối thực tế'}
+                  </span>
+                </button>
+              </div>
               <p className="text-xs leading-relaxed">
-                {geminiHealth?.configured
-                  ? 'Khóa API được đọc an toàn ở phía máy chủ Express, không lộ ra trình duyệt.'
-                  : 'Vui lòng thiết lập biến môi trường GEMINI_API_KEY trong phần Settings > Secrets của Google AI Studio. Giao diện không giả lập kết quả AI khi chưa có kết nối thật.'}
+                {geminiHealth?.message ||
+                  'Đang kiểm tra tình trạng kết nối máy chủ Gemini (/api/gemini/health)...'}
               </p>
             </div>
           </div>
@@ -198,10 +266,10 @@ export const GeminiAssistantPage: React.FC = () => {
         <div className="p-4 rounded-xl bg-white border border-[#70452F]/15 text-xs sm:text-sm text-[#65564A] space-y-1">
           <p className="font-semibold text-[#231B15] inline-flex items-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-[#70452F]" />
-            <span>Ngữ cảnh được phép gửi Gemini: {permittedArtifacts.length} hồ sơ</span>
+            <span>Ngữ cảnh được phép gửi Gemini: {permittedArtifacts.length} / 15 hồ sơ</span>
           </p>
           <p className="text-xs leading-relaxed">
-            Chỉ gửi siêu dữ liệu đã xác minh công khai; tuyệt đối không gửi ảnh chưa cấp phép, nội dung hạn chế, bản nháp hoặc hồ sơ đã thu hồi quyền. AI bị ràng buộc trích dẫn rõ Mã hiện vật, Nơi lưu giữ, Loại bản hiển thị và Nguồn.
+            Khóa API chỉ đọc ở phía máy chủ Node.js / Vercel Serverless, không lưu ở trình duyệt. Mọi câu trả lời liên quan đến hiện vật đều phải ghi rõ: Mã bản ghi, Tên hiện vật, Nơi lưu giữ, Loại bản đang hiển thị và Nguồn dẫn chứng.
           </p>
         </div>
       </div>
@@ -244,14 +312,14 @@ export const GeminiAssistantPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-[#231B15] mb-1.5">
-              Chọn kỷ vật mục tiêu {selectedActionMeta.needsTarget ? '(Bắt buộc)' : '(Tùy chọn)'}
+              Chọn hiện vật mục tiêu {selectedActionMeta.needsTarget ? '(Bắt buộc)' : '(Tùy chọn)'}
             </label>
             <select
               value={targetId}
               onChange={(e) => setTargetId(e.target.value)}
               className="w-full h-10 px-3 rounded-lg border border-[#70452F]/25 text-sm bg-white"
             >
-              <option value="">-- Toàn bộ các hồ sơ được phép --</option>
+              <option value="">-- Toàn bộ {permittedArtifacts.length} hồ sơ được phép --</option>
               {permittedArtifacts.map((a) => (
                 <option key={a.id} value={a.identifier}>
                   {a.identifier} — {a.title || '(Chưa đặt tên)'}
@@ -262,7 +330,7 @@ export const GeminiAssistantPage: React.FC = () => {
 
           <div className="flex flex-col justify-end text-xs text-[#65564A]">
             <p>
-              Mọi câu trả lời về kỷ vật đều bắt buộc dẫn rõ: Mã bản ghi, nơi lưu giữ được phép tiết lộ, loại bản đang hiển thị và nguồn sử dụng.
+              Nếu dữ liệu không hỗ trợ câu trả lời, trợ lý bắt buộc trả lời: “Chưa có tư liệu được xác minh để trả lời câu hỏi này”.
             </p>
           </div>
         </div>
@@ -301,8 +369,23 @@ export const GeminiAssistantPage: React.FC = () => {
         </div>
 
         {error && (
-          <div className="p-3.5 rounded-lg bg-red-50 border border-red-200 text-xs sm:text-sm text-red-800">
-            {error}
+          <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-xs sm:text-sm text-red-900 space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="font-semibold">
+                {error.status ? DIAGNOSTIC_STATUS_LABELS[error.status] : 'Không thể xử lý yêu cầu'}
+                {error.httpStatus ? ` (HTTP ${error.httpStatus})` : ''}
+              </span>
+              <button
+                type="button"
+                onClick={runAssistRequest}
+                disabled={loading}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-800 text-white text-xs font-medium hover:bg-red-900 disabled:opacity-60"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+                <span>Thử lại</span>
+              </button>
+            </div>
+            <p className="leading-relaxed">{error.message}</p>
           </div>
         )}
 
@@ -312,7 +395,7 @@ export const GeminiAssistantPage: React.FC = () => {
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#70452F] text-white text-sm font-medium hover:bg-[#543220] disabled:opacity-60"
         >
           <Send className="w-4 h-4" />
-          <span>{loading ? 'Đang truy vấn Gemini...' : 'Gửi yêu cầu'}</span>
+          <span>{loading ? 'Đang kết nối Gemini...' : 'Gửi yêu cầu'}</span>
         </button>
       </form>
 
@@ -330,7 +413,7 @@ export const GeminiAssistantPage: React.FC = () => {
           </div>
 
           <textarea
-            rows={9}
+            rows={10}
             value={editedOutput}
             onChange={(e) => setEditedOutput(e.target.value)}
             className="w-full p-3.5 rounded-xl bg-[#F8F4EC]/50 border border-[#70452F]/20 text-sm text-[#231B15] leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#C59A54]"
