@@ -1,6 +1,8 @@
 import { FamilyArtifact } from '../types/artifact';
 import { sanitizeArtifactsForGemini } from '../utils/completeness';
 
+const GEMINI_API_ENDPOINT = '/api/gemini/assist';
+
 export type GeminiActionType =
   | 'qa'
   | 'summarize_story'
@@ -15,6 +17,7 @@ export type GeminiClientStatus =
   | 'not_configured'
   | 'invalid_key'
   | 'permission_denied'
+  | 'model_not_found'
   | 'rate_limited'
   | 'network_error'
   | 'server_error'
@@ -27,10 +30,12 @@ export interface GeminiHealthStatus {
   status: GeminiClientStatus;
   httpStatus?: number;
   model: string;
+  availableModels?: string[];
   message: string;
 }
 
 export interface GeminiAssistResponse {
+  answer: string;
   text: string;
   model: string;
   label: string;
@@ -53,40 +58,109 @@ export class GeminiClientError extends Error {
   }
 }
 
-export async function checkGeminiHealth(liveVerify = false): Promise<GeminiHealthStatus> {
-  const endpoint = liveVerify ? '/api/gemini/health?verify=1' : '/api/gemini/health';
+interface ParsedResponseResult {
+  isJson: boolean;
+  data: Record<string, unknown> | null;
+  rawText: string;
+}
+
+async function safeParseResponse(res: Response): Promise<ParsedResponseResult> {
+  const rawText = await res.text();
+  const contentType = (res.headers.get('content-type') ?? '').toLowerCase();
+  const trimmed = rawText.trim();
+
+  if (
+    !contentType.includes('application/json') &&
+    !trimmed.startsWith('{') &&
+    !trimmed.startsWith('[')
+  ) {
+    return { isJson: false, data: null, rawText };
+  }
+
   try {
-    const res = await fetch(endpoint, { method: 'GET' });
-    const contentType = res.headers.get('content-type') ?? '';
-    if (!contentType.includes('application/json')) {
+    const parsed = JSON.parse(trimmed) as unknown;
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
       return {
-        ok: false,
-        configured: false,
-        verifiedLive: liveVerify,
-        status: 'endpoint_unreachable',
-        httpStatus: res.status,
-        model: 'gemini-4-hydrogen',
-        message:
-          'API backend /api/gemini/health chưa sẵn sàng trên máy chủ hiện tại (nhận phản hồi không phải JSON). Nếu đang chạy trên Vercel, hãy kiểm tra thư mục api/ và cấu hình vercel.json.',
+        isJson: true,
+        data: parsed as Record<string, unknown>,
+        rawText,
       };
     }
+    return { isJson: false, data: null, rawText };
+  } catch {
+    return { isJson: false, data: null, rawText };
+  }
+}
 
-    const data = (await res.json()) as Partial<GeminiHealthStatus>;
+function mapHttpFailure(
+  httpStatus: number,
+  serverStatus?: GeminiClientStatus,
+  serverMessage?: string
+): { status: GeminiClientStatus; message: string } {
+  if (httpStatus === 400) {
     return {
-      ok: Boolean(data.ok ?? data.configured),
-      configured: Boolean(data.configured),
-      verifiedLive: Boolean(data.verifiedLive),
-      status:
-        data.status ??
-        (data.configured ? 'ready' : 'not_configured'),
-      httpStatus: data.httpStatus ?? res.status,
-      model: data.model || 'gemini-4-hydrogen',
+      status: serverStatus ?? 'server_error',
       message:
-        data.message ||
-        (data.configured
-          ? 'Máy chủ Gemini đã cấu hình khóa API.'
-          : 'Chưa cấu hình GEMINI_API_KEY trên máy chủ.'),
+        serverMessage ||
+        'Yêu cầu gửi lên máy chủ Gemini không hợp lệ (HTTP 400). Vui lòng kiểm tra nội dung câu hỏi và hồ sơ đã chọn.',
     };
+  }
+  if (httpStatus === 401 || httpStatus === 403) {
+    return {
+      status:
+        serverStatus ??
+        (httpStatus === 401 ? 'invalid_key' : 'permission_denied'),
+      message:
+        serverMessage ||
+        `Lỗi xác thực hoặc không có quyền gọi Gemini API (HTTP ${httpStatus}). Vui lòng kiểm tra GEMINI_API_KEY trên máy chủ.`,
+    };
+  }
+  if (httpStatus === 404) {
+    return {
+      status: serverStatus ?? 'model_not_found',
+      message:
+        serverMessage ||
+        'Không tìm thấy API endpoint /api/gemini/assist hoặc model Gemini không khả dụng (HTTP 404).',
+    };
+  }
+  if (httpStatus === 429) {
+    return {
+      status: 'rate_limited',
+      message:
+        serverMessage ||
+        'Đã vượt giới hạn lượt gọi Gemini API (HTTP 429). Vui lòng chờ giây lát và nhấn Thử lại.',
+    };
+  }
+  if (httpStatus >= 500) {
+    return {
+      status: serverStatus ?? 'server_error',
+      message:
+        serverMessage ||
+        `Máy chủ backend hoặc Google Gemini đang gặp lỗi (HTTP ${httpStatus}). Vui lòng kiểm tra cấu hình hoặc nhấn Thử lại.`,
+    };
+  }
+
+  return {
+    status: serverStatus ?? 'server_error',
+    message:
+      serverMessage ||
+      `Lỗi kết nối Gemini API (mã HTTP ${httpStatus}). Vui lòng thử lại.`,
+  };
+}
+
+export async function checkGeminiHealth(
+  liveVerify = false
+): Promise<GeminiHealthStatus> {
+  const endpoint = liveVerify
+    ? `${GEMINI_API_ENDPOINT}?verify=1`
+    : GEMINI_API_ENDPOINT;
+
+  let res: Response;
+  try {
+    res = await fetch(endpoint, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+    });
   } catch {
     return {
       ok: false,
@@ -94,11 +168,66 @@ export async function checkGeminiHealth(liveVerify = false): Promise<GeminiHealt
       verifiedLive: liveVerify,
       status: 'network_error',
       httpStatus: 0,
-      model: 'gemini-4-hydrogen',
+      model: 'Chưa xác định',
       message:
-        'Không thể kết nối tới API backend (/api/gemini/health). Vui lòng kiểm tra kết nối mạng hoặc thử lại.',
+        'Không thể kết nối tới API backend (/api/gemini/assist) do lỗi mạng. Vui lòng kiểm tra kết nối và thử lại.',
     };
   }
+
+  const parsed = await safeParseResponse(res);
+  if (!parsed.isJson || !parsed.data) {
+    return {
+      ok: false,
+      configured: false,
+      verifiedLive: liveVerify,
+      status: 'endpoint_unreachable',
+      httpStatus: res.status,
+      model: 'Chưa xác định',
+      message: `API backend ${GEMINI_API_ENDPOINT} trả về phản hồi không phải JSON (mã HTTP ${res.status}). Hãy kiểm tra Vercel Function tại api/gemini/assist.ts và cấu hình vercel.json.`,
+    };
+  }
+
+  const d = parsed.data as Partial<GeminiHealthStatus>;
+  const model = typeof d.model === 'string' && d.model ? d.model : 'gemini-4-hydrogen';
+  const configured = Boolean(d.configured);
+  const ok = Boolean(d.ok ?? configured);
+
+  if (!res.ok && res.status !== 503) {
+    const mapped = mapHttpFailure(
+      res.status,
+      d.status,
+      typeof d.message === 'string' ? d.message : undefined
+    );
+    return {
+      ok: false,
+      configured,
+      verifiedLive: Boolean(d.verifiedLive ?? liveVerify),
+      status: mapped.status,
+      httpStatus: res.status,
+      model,
+      availableModels: Array.isArray(d.availableModels)
+        ? d.availableModels
+        : undefined,
+      message: mapped.message,
+    };
+  }
+
+  return {
+    ok,
+    configured,
+    verifiedLive: Boolean(d.verifiedLive),
+    status: d.status ?? (configured ? 'ready' : 'not_configured'),
+    httpStatus: typeof d.httpStatus === 'number' ? d.httpStatus : res.status,
+    model,
+    availableModels: Array.isArray(d.availableModels)
+      ? d.availableModels
+      : undefined,
+    message:
+      (typeof d.message === 'string' && d.message) ||
+      (configured
+        ? 'Máy chủ Gemini đã cấu hình khóa API.'
+        : 'Chưa cấu hình GEMINI_API_KEY trên máy chủ.'),
+  };
 }
 
 export async function requestGeminiAssist(params: {
@@ -107,13 +236,19 @@ export async function requestGeminiAssist(params: {
   artifacts: FamilyArtifact[];
   targetArtifactId?: string;
 }): Promise<GeminiAssistResponse> {
-  const sanitizedContext = sanitizeArtifactsForGemini(params.artifacts).slice(0, 15);
+  const sanitizedContext = sanitizeArtifactsForGemini(params.artifacts).slice(
+    0,
+    15
+  );
 
   let res: Response;
   try {
-    res = await fetch('/api/gemini/assist', {
+    res = await fetch(GEMINI_API_ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
       body: JSON.stringify({
         action: params.action,
         question: params.question,
@@ -123,25 +258,27 @@ export async function requestGeminiAssist(params: {
     });
   } catch {
     throw new GeminiClientError(
-      'Lỗi kết nối mạng khi gọi máy chủ backend (/api/gemini/assist). Vui lòng kiểm tra mạng và nhấn Thử lại.',
+      'Mất kết nối mạng khi gọi máy chủ backend (/api/gemini/assist). Vui lòng kiểm tra kết nối mạng và nhấn Thử lại.',
       { httpStatus: 0, status: 'network_error', errorCode: 'NETWORK_ERROR' }
     );
   }
 
-  const contentType = res.headers.get('content-type') ?? '';
-  if (!contentType.includes('application/json')) {
+  const parsed = await safeParseResponse(res);
+  if (!parsed.isJson || !parsed.data) {
     throw new GeminiClientError(
-      `API máy chủ /api/gemini/assist không trả về JSON hợp lệ (mã HTTP ${res.status}). Vui lòng kiểm tra triển khai backend trên Vercel hoặc Node.js.`,
+      `API máy chủ ${GEMINI_API_ENDPOINT} không trả về JSON hợp lệ (mã HTTP ${res.status}). Vui lòng kiểm tra triển khai backend trên Vercel (api/gemini/assist.ts) hoặc Node.js.`,
       {
         httpStatus: res.status,
-        status: 'endpoint_unreachable',
-        errorCode: 'ENDPOINT_UNREACHABLE',
+        status: res.status === 404 ? 'endpoint_unreachable' : 'server_error',
+        errorCode:
+          res.status === 404 ? 'ENDPOINT_NOT_FOUND' : 'NON_JSON_RESPONSE',
       }
     );
   }
 
-  const data = (await res.json().catch(() => ({}))) as {
+  const data = parsed.data as {
     ok?: boolean;
+    answer?: string;
     text?: string;
     model?: string;
     label?: string;
@@ -150,19 +287,20 @@ export async function requestGeminiAssist(params: {
     message?: string;
   };
 
-  if (!res.ok || !data?.text) {
-    throw new GeminiClientError(
-      data?.message || `Lỗi kết nối Gemini API (mã HTTP ${res.status}). Vui lòng thử lại.`,
-      {
-        httpStatus: res.status,
-        status: data?.status ?? 'server_error',
-        errorCode: data?.error ?? 'GEMINI_API_ERROR',
-      }
-    );
+  const answerText = (data.answer ?? data.text ?? '').trim();
+
+  if (!res.ok || !answerText) {
+    const mapped = mapHttpFailure(res.status, data.status, data.message);
+    throw new GeminiClientError(mapped.message, {
+      httpStatus: res.status,
+      status: mapped.status,
+      errorCode: data.error ?? `HTTP_${res.status}`,
+    });
   }
 
   return {
-    text: data.text,
+    answer: answerText,
+    text: answerText,
     model: data.model || 'gemini-4-hydrogen',
     label: data.label || 'NỘI DUNG AI ĐỀ XUẤT – CHƯA KIỂM CHỨNG',
   };

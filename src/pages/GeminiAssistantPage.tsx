@@ -74,10 +74,11 @@ const DIAGNOSTIC_STATUS_LABELS: Record<GeminiClientStatus, string> = {
   not_configured: 'API key chưa cấu hình',
   invalid_key: 'API key không hợp lệ',
   permission_denied: 'Không có quyền gọi model',
+  model_not_found: 'Model Gemini không khả dụng',
   rate_limited: 'Vượt giới hạn sử dụng',
   network_error: 'Lỗi kết nối',
   server_error: 'Lỗi phản hồi máy chủ',
-  endpoint_unreachable: 'Chưa tìm thấy API backend (/api/gemini)',
+  endpoint_unreachable: 'Chưa tìm thấy API backend (/api/gemini/assist)',
 };
 
 export const GeminiAssistantPage: React.FC = () => {
@@ -257,8 +258,13 @@ export const GeminiAssistantPage: React.FC = () => {
               </div>
               <p className="text-xs leading-relaxed">
                 {geminiHealth?.message ||
-                  'Đang kiểm tra tình trạng kết nối máy chủ Gemini (/api/gemini/health)...'}
+                  'Đang kiểm tra tình trạng kết nối máy chủ Gemini (/api/gemini/assist)...'}
               </p>
+              {geminiHealth?.availableModels && geminiHealth.availableModels.length > 0 && (
+                <p className="text-[11px] opacity-80">
+                  Model khả dụng: {geminiHealth.availableModels.slice(0, 4).join(', ')}
+                </p>
+              )}
             </div>
           </div>
         </div>

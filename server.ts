@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import {
   checkGeminiServerHealth,
   executeGeminiAssist,
-} from './lib/geminiServer';
+} from './api/gemini/assist';
 
 dotenv.config();
 
@@ -60,15 +60,44 @@ app.get('/api/public/bundle', (_req, res) => {
   }
 });
 
-app.get('/api/gemini/health', async (req, res) => {
-  const verify = req.query?.verify === '1' || req.query?.verify === 'true';
-  const result = await checkGeminiServerHealth(verify);
-  res.status(result.httpStatus).json(result);
+app.get('/api/gemini/assist', async (req, res) => {
+  try {
+    const verify = req.query?.verify === '1' || req.query?.verify === 'true';
+    const result = await checkGeminiServerHealth(verify);
+    res.status(result.httpStatus).json(result);
+  } catch {
+    res.status(500).json({
+      ok: false,
+      httpStatus: 500,
+      status: 'server_error',
+      error: 'INTERNAL_SERVER_ERROR',
+      message: 'Lỗi nội bộ máy chủ khi kiểm tra trạng thái Gemini.',
+    });
+  }
 });
 
 app.post('/api/gemini/assist', async (req, res) => {
-  const result = await executeGeminiAssist(req.body ?? {});
-  res.status(result.httpStatus).json(result);
+  try {
+    const result = await executeGeminiAssist(req.body ?? {});
+    res.status(result.httpStatus).json(result);
+  } catch {
+    res.status(500).json({
+      ok: false,
+      httpStatus: 500,
+      status: 'server_error',
+      error: 'INTERNAL_SERVER_ERROR',
+      message: 'Lỗi nội bộ máy chủ khi xử lý yêu cầu Gemini.',
+    });
+  }
+});
+
+app.use('/api/*', (_req, res) => {
+  res.status(404).json({
+    ok: false,
+    httpStatus: 404,
+    error: 'API_ROUTE_NOT_FOUND',
+    message: 'Không tìm thấy API endpoint yêu cầu.',
+  });
 });
 
 async function startServer() {
