@@ -105,7 +105,10 @@ export interface FamilyArtifact {
   permissionRole: string;
   permissionDate: string;
   permissionScope: string;
+  permissionEvidence?: string;
   permissionStatus: PermissionStatus;
+  descriptionRightsNote?: string;
+  imageRightsStatus?: string;
   restrictedContent: string;
   revocationDate?: string;
   verificationStatus: VerificationStatus;
@@ -177,8 +180,12 @@ export interface PermissionRegistryEntry {
   custodian: string;
   rightsHolder: string;
   permissionStatus: PermissionStatus;
+  descriptionRightsStatus?: string;
   imageRightsStatus: string;
   permissionScope: string;
+  permissionGrantedBy?: string;
+  permissionDate?: string;
+  permissionEvidence?: string;
   restrictedContent: string;
   officialSourceUrl: string;
 }

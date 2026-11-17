@@ -10,7 +10,7 @@ interface ArtifactPlaceholderProps {
 export const ArtifactPlaceholder: React.FC<ArtifactPlaceholderProps> = ({
   className = '',
   compact = false,
-  reason = 'Chưa có ảnh tư liệu được phép công bố',
+  reason = 'Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.',
 }) => {
   return (
     <div

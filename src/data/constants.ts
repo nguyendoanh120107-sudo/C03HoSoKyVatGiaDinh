@@ -33,6 +33,12 @@ export const PROJECT_INFO = {
   targetArtifactCount: 15,
 };
 
+export const DESCRIPTION_RIGHTS_NOTICE =
+  'Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.';
+
+export const IMAGE_RIGHTS_UNVERIFIED_NOTICE =
+  'Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.';
+
 export const ARTIFACT_CATEGORIES: ArtifactCategory[] = [
   'Huân chương, huy chương',
   'Giấy khen, bằng khen',
@@ -249,8 +255,8 @@ export const DEFAULT_FAMILY_PROFILE: FamilyArchiveProfile = {
   familyName: 'Bộ sưu tập tư liệu công khai tại Bảo tàng Bắc Ninh (Chờ xác nhận phạm vi C03)',
   artifactCollectionTheme: 'Kỷ vật cá nhân, hiện vật đời sống, kháng chiến và di sản văn hóa Bắc Ninh',
   verifiedStorageLocation: 'Bảo tàng tỉnh Bắc Ninh (baotangbacninh.vn)',
-  authorizingPerson: 'Chưa có văn bản cấp phép đăng lại ảnh riêng (chỉ dẫn nguồn siêu dữ liệu công khai)',
-  allowedScope: 'Tra cứu siêu dữ liệu công khai phi lợi nhuận; không sao chép ảnh bảo tàng khi chưa có văn bản cho phép',
+  authorizingPerson: '',
+  allowedScope: 'Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh',
   updatedAt: '2026-11-17T00:10:00.000Z',
 };
 
@@ -299,11 +305,12 @@ export const DEMO_ARTIFACTS: FamilyArtifact[] = [
     displayedCopyType: 'Bản số của gốc',
     originalCondition: 'Hư hại nhẹ',
     registrationNumber: 'DEMO-00001',
-    permissionGrantedBy: 'Không áp dụng (DEMO)',
-    permissionRole: 'Mẫu minh họa',
-    permissionDate: '2026-11-17',
-    permissionScope: 'Trình diễn giao diện',
-    permissionStatus: 'Đã được phép',
+    permissionGrantedBy: '',
+    permissionRole: '',
+    permissionDate: '',
+    permissionEvidence: '',
+    permissionScope: 'Chưa xác minh quyền công bố (mẫu minh họa)',
+    permissionStatus: 'Chưa xin phép',
     restrictedContent: '',
     verificationStatus: 'Chưa kiểm chứng',
     material: 'Mẫu minh họa',

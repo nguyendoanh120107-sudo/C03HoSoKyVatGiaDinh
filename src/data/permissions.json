@@ -5,10 +5,14 @@
     "custodian": "Bảo tàng Bắc Ninh",
     "rightsHolder": "Bảo tàng Bắc Ninh",
     "permissionStatus": "Chưa xin phép",
-    "imageRightsStatus": "Chưa xác minh quyền đăng lại ảnh",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; không sao chép hình ảnh khi chưa có văn bản cho phép",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "restrictedContent": "Hình ảnh trên cổng thông tin Bảo tàng Bắc Ninh chưa có văn bản cấp phép đăng lại",
-    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat"
+    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat",
+    "descriptionRightsStatus": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "permissionGrantedBy": "",
+    "permissionDate": "",
+    "permissionEvidence": ""
   },
   {
     "identifier": "C03-00002",
@@ -16,10 +20,14 @@
     "custodian": "Bảo tàng Bắc Ninh",
     "rightsHolder": "Bảo tàng Bắc Ninh",
     "permissionStatus": "Chưa xin phép",
-    "imageRightsStatus": "Chưa xác minh quyền đăng lại ảnh",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; không sao chép hình ảnh khi chưa có văn bản cho phép",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "restrictedContent": "Hình ảnh trên cổng thông tin Bảo tàng Bắc Ninh chưa có văn bản cấp phép đăng lại",
-    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat"
+    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat",
+    "descriptionRightsStatus": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "permissionGrantedBy": "",
+    "permissionDate": "",
+    "permissionEvidence": ""
   },
   {
     "identifier": "C03-00003",
@@ -27,10 +35,14 @@
     "custodian": "Bảo tàng Bắc Ninh cơ sở 2",
     "rightsHolder": "Bảo tàng Bắc Ninh",
     "permissionStatus": "Chưa xin phép",
-    "imageRightsStatus": "Chưa xác minh quyền đăng lại ảnh",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; không sao chép hình ảnh khi chưa có văn bản cho phép",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "restrictedContent": "Hình ảnh trên cổng thông tin Bảo tàng Bắc Ninh chưa có văn bản cấp phép đăng lại",
-    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat"
+    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat",
+    "descriptionRightsStatus": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "permissionGrantedBy": "",
+    "permissionDate": "",
+    "permissionEvidence": ""
   },
   {
     "identifier": "C03-00004",
@@ -38,10 +50,14 @@
     "custodian": "Bảo tàng Bắc Ninh cơ sở 2",
     "rightsHolder": "Bảo tàng Bắc Ninh",
     "permissionStatus": "Chưa xin phép",
-    "imageRightsStatus": "Chưa xác minh quyền đăng lại ảnh",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; không sao chép hình ảnh khi chưa có văn bản cho phép",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "restrictedContent": "Hình ảnh trên cổng thông tin Bảo tàng Bắc Ninh chưa có văn bản cấp phép đăng lại",
-    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat"
+    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat",
+    "descriptionRightsStatus": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "permissionGrantedBy": "",
+    "permissionDate": "",
+    "permissionEvidence": ""
   },
   {
     "identifier": "C03-00005",
@@ -49,10 +65,14 @@
     "custodian": "Bảo tàng Bắc Ninh cơ sở 2",
     "rightsHolder": "Bảo tàng Bắc Ninh",
     "permissionStatus": "Chưa xin phép",
-    "imageRightsStatus": "Chưa xác minh quyền đăng lại ảnh",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; không sao chép hình ảnh khi chưa có văn bản cho phép",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "restrictedContent": "Hình ảnh trên cổng thông tin Bảo tàng Bắc Ninh chưa có văn bản cấp phép đăng lại",
-    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat"
+    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat",
+    "descriptionRightsStatus": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "permissionGrantedBy": "",
+    "permissionDate": "",
+    "permissionEvidence": ""
   },
   {
     "identifier": "C03-00006",
@@ -60,10 +80,14 @@
     "custodian": "Bảo tàng Bắc Ninh",
     "rightsHolder": "Bảo tàng Bắc Ninh",
     "permissionStatus": "Chưa xin phép",
-    "imageRightsStatus": "Chưa xác minh quyền đăng lại ảnh",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; không sao chép hình ảnh khi chưa có văn bản cho phép",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "restrictedContent": "Hình ảnh trên cổng thông tin Bảo tàng Bắc Ninh chưa có văn bản cấp phép đăng lại",
-    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat"
+    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat",
+    "descriptionRightsStatus": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "permissionGrantedBy": "",
+    "permissionDate": "",
+    "permissionEvidence": ""
   },
   {
     "identifier": "C03-00007",
@@ -71,10 +95,14 @@
     "custodian": "Bảo tàng Bắc Ninh",
     "rightsHolder": "Bảo tàng Bắc Ninh",
     "permissionStatus": "Chưa xin phép",
-    "imageRightsStatus": "Chưa xác minh quyền đăng lại ảnh",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; không sao chép hình ảnh khi chưa có văn bản cho phép",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "restrictedContent": "Hình ảnh trên cổng thông tin Bảo tàng Bắc Ninh chưa có văn bản cấp phép đăng lại",
-    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat"
+    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat",
+    "descriptionRightsStatus": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "permissionGrantedBy": "",
+    "permissionDate": "",
+    "permissionEvidence": ""
   },
   {
     "identifier": "C03-00008",
@@ -82,10 +110,14 @@
     "custodian": "Bảo tàng Bắc Ninh",
     "rightsHolder": "Bảo tàng Bắc Ninh",
     "permissionStatus": "Chưa xin phép",
-    "imageRightsStatus": "Chưa xác minh quyền đăng lại ảnh",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; không sao chép hình ảnh khi chưa có văn bản cho phép",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "restrictedContent": "Hình ảnh thư tay trên cổng thông tin Bảo tàng Bắc Ninh chưa có văn bản cấp phép đăng lại",
-    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat"
+    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat",
+    "descriptionRightsStatus": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "permissionGrantedBy": "",
+    "permissionDate": "",
+    "permissionEvidence": ""
   },
   {
     "identifier": "C03-00009",
@@ -93,10 +125,14 @@
     "custodian": "Bảo tàng Bắc Ninh",
     "rightsHolder": "Bảo tàng Bắc Ninh",
     "permissionStatus": "Chưa xin phép",
-    "imageRightsStatus": "Chưa xác minh quyền đăng lại ảnh",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; không sao chép hình ảnh khi chưa có văn bản cho phép",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "restrictedContent": "Hình ảnh trên cổng thông tin Bảo tàng Bắc Ninh chưa có văn bản cấp phép đăng lại",
-    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat"
+    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat",
+    "descriptionRightsStatus": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "permissionGrantedBy": "",
+    "permissionDate": "",
+    "permissionEvidence": ""
   },
   {
     "identifier": "C03-00010",
@@ -104,10 +140,14 @@
     "custodian": "Bảo tàng Bắc Ninh",
     "rightsHolder": "Bảo tàng Bắc Ninh",
     "permissionStatus": "Chưa xin phép",
-    "imageRightsStatus": "Chưa xác minh quyền đăng lại ảnh",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; không sao chép hình ảnh khi chưa có văn bản cho phép",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "restrictedContent": "Hình ảnh trên cổng thông tin Bảo tàng Bắc Ninh chưa có văn bản cấp phép đăng lại",
-    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat"
+    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat",
+    "descriptionRightsStatus": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "permissionGrantedBy": "",
+    "permissionDate": "",
+    "permissionEvidence": ""
   },
   {
     "identifier": "C03-00011",
@@ -115,10 +155,14 @@
     "custodian": "Bảo tàng Bắc Ninh",
     "rightsHolder": "Bảo tàng Bắc Ninh",
     "permissionStatus": "Chưa xin phép",
-    "imageRightsStatus": "Chưa xác minh quyền đăng lại ảnh",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; không sao chép hình ảnh khi chưa có văn bản cho phép",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "restrictedContent": "Hình ảnh trên cổng thông tin Bảo tàng Bắc Ninh chưa có văn bản cấp phép đăng lại",
-    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat"
+    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat",
+    "descriptionRightsStatus": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "permissionGrantedBy": "",
+    "permissionDate": "",
+    "permissionEvidence": ""
   },
   {
     "identifier": "C03-00012",
@@ -126,10 +170,14 @@
     "custodian": "Bảo tàng Bắc Ninh",
     "rightsHolder": "Bảo tàng Bắc Ninh",
     "permissionStatus": "Chưa xin phép",
-    "imageRightsStatus": "Chưa xác minh quyền đăng lại ảnh",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; không sao chép hình ảnh khi chưa có văn bản cho phép",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "restrictedContent": "Hình ảnh trên cổng thông tin Bảo tàng Bắc Ninh chưa có văn bản cấp phép đăng lại",
-    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat"
+    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat",
+    "descriptionRightsStatus": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "permissionGrantedBy": "",
+    "permissionDate": "",
+    "permissionEvidence": ""
   },
   {
     "identifier": "C03-00013",
@@ -137,10 +185,14 @@
     "custodian": "Bảo tàng Bắc Ninh",
     "rightsHolder": "Bảo tàng Bắc Ninh",
     "permissionStatus": "Chưa xin phép",
-    "imageRightsStatus": "Chưa xác minh quyền đăng lại ảnh",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; không sao chép hình ảnh khi chưa có văn bản cho phép",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "restrictedContent": "Hình ảnh trên cổng thông tin Bảo tàng Bắc Ninh chưa có văn bản cấp phép đăng lại",
-    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat"
+    "officialSourceUrl": "https://www.baotangbacninh.vn/ds-hien-vat",
+    "descriptionRightsStatus": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "permissionGrantedBy": "",
+    "permissionDate": "",
+    "permissionEvidence": ""
   },
   {
     "identifier": "C03-00014",
@@ -148,10 +200,14 @@
     "custodian": "Bảo tàng Bắc Ninh cơ sở 2",
     "rightsHolder": "Bảo tàng Bắc Ninh",
     "permissionStatus": "Chưa xin phép",
-    "imageRightsStatus": "Chưa xác minh quyền đăng lại ảnh",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; không sao chép hình ảnh khi chưa có văn bản cho phép",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "restrictedContent": "Hình ảnh trên cổng thông tin Bảo tàng Bắc Ninh chưa có văn bản cấp phép đăng lại",
-    "officialSourceUrl": "https://www.baotangbacninh.vn/"
+    "officialSourceUrl": "https://www.baotangbacninh.vn/",
+    "descriptionRightsStatus": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "permissionGrantedBy": "",
+    "permissionDate": "",
+    "permissionEvidence": ""
   },
   {
     "identifier": "C03-00015",
@@ -159,9 +215,13 @@
     "custodian": "Bảo tàng tỉnh Bắc Ninh",
     "rightsHolder": "Bảo tàng Bắc Ninh",
     "permissionStatus": "Chưa xin phép",
-    "imageRightsStatus": "Chưa xác minh quyền đăng lại ảnh",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; không sao chép hình ảnh khi chưa có văn bản cho phép",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "restrictedContent": "Hình ảnh trên cổng thông tin Bảo tàng Bắc Ninh chưa có văn bản cấp phép đăng lại",
-    "officialSourceUrl": "https://www.baotangbacninh.vn/"
+    "officialSourceUrl": "https://www.baotangbacninh.vn/",
+    "descriptionRightsStatus": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "permissionGrantedBy": "",
+    "permissionDate": "",
+    "permissionEvidence": ""
   }
 ]

@@ -15,13 +15,17 @@ import { SkeletonCards } from '../components/SkeletonCards';
 import { useArchive } from '../context/ArchiveContext';
 import {
   ARTIFACT_CATEGORIES,
+  DESCRIPTION_RIGHTS_NOTICE,
   DISPLAYED_COPY_TYPES,
+  IMAGE_RIGHTS_UNVERIFIED_NOTICE,
   ORIGINAL_CONDITIONS,
 } from '../data/constants';
 import {
   displayOrPlaceholder,
   evaluateArtifactCompleteness,
   extractYearFromDateText,
+  getEffectivePermissionStatus,
+  getPrimarySourceInfo,
   getPublicPermittedImages,
   isArtifactPubliclyVisible,
 } from '../utils/completeness';
@@ -184,6 +188,16 @@ export const CatalogPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Dual Rights Notice Banner */}
+      <section className="bg-white rounded-xl border border-[#70452F]/15 p-4 text-xs text-[#65564A] space-y-1">
+        <p>
+          <strong className="text-[#231B15]">Quyền sử dụng thông tin mô tả:</strong> {DESCRIPTION_RIGHTS_NOTICE}
+        </p>
+        <p>
+          <strong className="text-[#70452F]">Quyền đăng lại ảnh hoặc bản số:</strong> {IMAGE_RIGHTS_UNVERIFIED_NOTICE}
+        </p>
+      </section>
 
       {/* Filters & Search Toolbar */}
       <section className="bg-white rounded-xl border border-[#70452F]/15 p-4 sm:p-5 space-y-4">
@@ -355,10 +369,8 @@ export const CatalogPage: React.FC = () => {
             const permittedPhotos = getPublicPermittedImages(artifact);
             const cover = permittedPhotos[0];
             const completeness = evaluateArtifactCompleteness(artifact);
-            const officialUrl =
-              artifact.referenceSources[0]?.urlOrCode ||
-              artifact.imageSources[0] ||
-              'https://www.baotangbacninh.vn/ds-hien-vat';
+            const effectivePerm = getEffectivePermissionStatus(artifact);
+            const sourceInfo = getPrimarySourceInfo(artifact);
 
             return (
               <article
@@ -376,7 +388,7 @@ export const CatalogPage: React.FC = () => {
                   ) : (
                     <ArtifactPlaceholder
                       className="w-full h-full border-0"
-                      reason="Chưa xác minh quyền đăng lại ảnh"
+                      reason={IMAGE_RIGHTS_UNVERIFIED_NOTICE}
                     />
                   )}
                 </div>
@@ -384,12 +396,18 @@ export const CatalogPage: React.FC = () => {
                 <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                   <div className="space-y-2">
                     <div className="text-xs font-mono text-[#70452F] tabular-nums">
-                      {artifact.identifier} · {artifact.registrationNumber}
+                      {artifact.identifier} · Mã nguồn: {sourceInfo.registrationNumber}
                     </div>
                     <h2 className="font-editorial text-xl font-semibold text-[#231B15] line-clamp-2">
                       {displayOrPlaceholder(artifact.title)}
                     </h2>
                     <dl className="space-y-1 text-xs text-[#65564A] pt-1">
+                      <div className="flex justify-between gap-2">
+                        <dt>Đơn vị lưu giữ:</dt>
+                        <dd className="font-medium text-[#231B15] text-right truncate max-w-[65%]">
+                          {sourceInfo.custodian}
+                        </dd>
+                      </div>
                       <div className="flex justify-between gap-2">
                         <dt>Niên đại:</dt>
                         <dd className="font-medium text-[#231B15] text-right truncate max-w-[65%]">
@@ -409,15 +427,9 @@ export const CatalogPage: React.FC = () => {
                         </dd>
                       </div>
                       <div className="flex justify-between gap-2">
-                        <dt>Nơi lưu giữ:</dt>
-                        <dd className="font-medium text-[#231B15] text-right truncate max-w-[65%]">
-                          {artifact.currentStorageLocation}
-                        </dd>
-                      </div>
-                      <div className="flex justify-between gap-2">
-                        <dt>Kiểm chứng:</dt>
+                        <dt>Quyền mô tả:</dt>
                         <dd className="font-medium text-[#52624B] text-right">
-                          {artifact.verificationStatus}
+                          Tổng hợp có dẫn chứng
                         </dd>
                       </div>
                     </dl>
@@ -427,19 +439,19 @@ export const CatalogPage: React.FC = () => {
                     <div className="flex items-center justify-between gap-2">
                       <span
                         className={`inline-flex items-center gap-1 font-medium ${
-                          artifact.permissionStatus === 'Đã được phép'
+                          effectivePerm === 'Đã được phép'
                             ? 'text-[#52624B]'
                             : 'text-[#70452F]'
                         }`}
                       >
-                        {artifact.permissionStatus === 'Đã được phép' ? (
+                        {effectivePerm === 'Đã được phép' ? (
                           <ShieldCheck className="w-3.5 h-3.5" />
                         ) : (
                           <ShieldAlert className="w-3.5 h-3.5" />
                         )}
-                        {artifact.permissionStatus === 'Đã được phép'
-                          ? 'Đã cấp phép ảnh'
-                          : 'Chưa cấp phép ảnh'}
+                        {effectivePerm === 'Đã được phép'
+                          ? 'Đã cấp phép ảnh (có bằng chứng)'
+                          : 'Chưa xác minh quyền đăng lại ảnh'}
                       </span>
 
                       <span className="text-[#65564A] tabular-nums">
@@ -447,15 +459,15 @@ export const CatalogPage: React.FC = () => {
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
                       <a
-                        href={officialUrl}
+                        href={sourceInfo.sourceUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[#52624B] hover:underline"
+                        className="inline-flex items-center gap-1 text-[#52624B] hover:underline break-all"
                       >
-                        <span>Trang nguồn chính thức</span>
-                        <ExternalLink className="w-3 h-3" />
+                        <span>{sourceInfo.sourceUrl}</span>
+                        <ExternalLink className="w-3 h-3 shrink-0" />
                       </a>
                       <Link
                         to={`/ky-vat/${encodeURIComponent(artifact.id)}`}
@@ -475,6 +487,7 @@ export const CatalogPage: React.FC = () => {
           {filteredArtifacts.map((artifact) => {
             const permittedPhotos = getPublicPermittedImages(artifact);
             const cover = permittedPhotos[0];
+            const sourceInfo = getPrimarySourceInfo(artifact);
             return (
               <article
                 key={artifact.id}
@@ -492,23 +505,31 @@ export const CatalogPage: React.FC = () => {
                     ) : (
                       <ArtifactPlaceholder
                         compact
-                        reason="Chưa cấp phép ảnh"
+                        reason="Chưa xác minh quyền ảnh"
                         className="w-full h-full border-0 text-[10px]"
                       />
                     )}
                   </div>
                   <div className="space-y-1 min-w-0">
                     <p className="text-xs font-mono text-[#70452F] tabular-nums">
-                      {artifact.identifier} · {artifact.registrationNumber} ·{' '}
+                      {artifact.identifier} · Mã nguồn: {sourceInfo.registrationNumber} ·{' '}
                       {artifact.verificationStatus}
                     </p>
                     <h2 className="font-editorial text-lg font-semibold text-[#231B15] truncate">
                       {displayOrPlaceholder(artifact.title)}
                     </h2>
                     <p className="text-xs text-[#65564A]">
-                      {artifact.currentStorageLocation} · Chất liệu:{' '}
-                      {displayOrPlaceholder(artifact.material)} · {artifact.displayedCopyType}
+                      <strong>Đơn vị lưu giữ:</strong> {sourceInfo.custodian} · {artifact.displayedCopyType}
                     </p>
+                    <a
+                      href={sourceInfo.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-[#52624B] hover:underline inline-flex items-center gap-1 break-all"
+                    >
+                      <span>{sourceInfo.sourceUrl}</span>
+                      <ExternalLink className="w-3 h-3 shrink-0" />
+                    </a>
                   </div>
                 </div>
 

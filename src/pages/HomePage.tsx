@@ -15,10 +15,15 @@ import { motion } from 'motion/react';
 import { ArtifactPlaceholder } from '../components/ArtifactPlaceholder';
 import { SkeletonCards } from '../components/SkeletonCards';
 import { useArchive } from '../context/ArchiveContext';
-import { PROJECT_INFO } from '../data/constants';
+import {
+  DESCRIPTION_RIGHTS_NOTICE,
+  IMAGE_RIGHTS_UNVERIFIED_NOTICE,
+  PROJECT_INFO,
+} from '../data/constants';
 import {
   displayOrPlaceholder,
   extractYearFromDateText,
+  getPrimarySourceInfo,
   getPublicPermittedImages,
   isArtifactPubliclyVisible,
 } from '../utils/completeness';
@@ -231,17 +236,30 @@ export const HomePage: React.FC = () => {
       <section aria-label="Thống kê hồ sơ và nguồn" className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white rounded-xl border border-[#70452F]/12 p-5 space-y-1.5">
-            <p className="text-xs font-medium text-[#65564A]">Hồ sơ thật đã xác minh nguồn</p>
-            <p className="text-3xl font-semibold text-[#70452F] tabular-nums">
-              {realStats.verifiedCount}
+            <p className="text-xs font-medium text-[#65564A]">Hồ sơ có nguồn đối chiếu</p>
+            <p className="text-3xl font-semibold text-[#52624B] tabular-nums">
+              {realStats.withSourcesCount}
               <span className="text-base font-normal text-[#65564A]"> / 15</span>
             </p>
-            <p className="text-xs text-[#65564A]">Lưu giữ tại Bảo tàng Bắc Ninh</p>
+            <p className="text-xs text-[#65564A]">
+              Tổng hợp mô tả từ nguồn công khai có dẫn chứng
+            </p>
+          </div>
+
+          <div className="bg-white rounded-xl border border-[#70452F]/12 p-5 space-y-1.5">
+            <p className="text-xs font-medium text-[#65564A]">Hồ sơ được phép công bố ảnh</p>
+            <p className="text-3xl font-semibold text-[#70452F] tabular-nums">
+              {realStats.permittedImageArtifactsCount}
+              <span className="text-base font-normal text-[#65564A]"> / 15</span>
+            </p>
+            <p className="text-xs text-[#70452F]">
+              Chỉ tính hồ sơ có bằng chứng, phạm vi & ngày xác nhận
+            </p>
           </div>
 
           <div className="bg-white rounded-xl border border-[#70452F]/12 p-5 space-y-1.5">
             <p className="text-xs font-medium text-[#65564A]">Nguồn tư liệu / Chính thống</p>
-            <p className="text-3xl font-semibold text-[#52624B] tabular-nums">
+            <p className="text-3xl font-semibold text-[#231B15] tabular-nums">
               {sourceStats.totalSources}
               <span className="text-base font-normal text-[#65564A]">
                 {' '}
@@ -254,23 +272,12 @@ export const HomePage: React.FC = () => {
           </div>
 
           <div className="bg-white rounded-xl border border-[#70452F]/12 p-5 space-y-1.5">
-            <p className="text-xs font-medium text-[#65564A]">Trạng thái quyền đăng lại ảnh</p>
-            <p className="text-3xl font-semibold text-[#231B15] tabular-nums">
-              {realStats.permittedCount}
-              <span className="text-base font-normal text-[#65564A]"> / 15</span>
-            </p>
-            <p className="text-xs text-[#70452F]">
-              Chưa xác minh quyền đăng lại ảnh bảo tàng
-            </p>
-          </div>
-
-          <div className="bg-white rounded-xl border border-[#70452F]/12 p-5 space-y-1.5">
-            <p className="text-xs font-medium text-[#65564A]">Ảnh được phép công khai</p>
+            <p className="text-xs font-medium text-[#65564A]">Ảnh có quyền đăng lại</p>
             <p className="text-3xl font-semibold text-[#C59A54] tabular-nums">
               {realStats.permittedRealImages}
             </p>
             <p className="text-xs text-[#65564A]">
-              Không sao chép ảnh chưa được cấp phép
+              Chưa có quyền → chỉ mở liên kết nguồn chính thức
             </p>
           </div>
         </div>
@@ -340,15 +347,20 @@ export const HomePage: React.FC = () => {
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-[#65564A] mb-1">Trạng thái cấp phép ảnh</dt>
+            <dt className="text-xs text-[#65564A] mb-1">Người / đơn vị cấp phép ảnh</dt>
             <dd className="font-medium text-[#70452F]">
-              {displayOrPlaceholder(familyProfile.authorizingPerson)}
+              {familyProfile.authorizingPerson?.trim()
+                ? familyProfile.authorizingPerson
+                : 'Chưa cập nhật (không tự điền khi chưa có bằng chứng)'}
             </dd>
           </div>
-          <div className="sm:col-span-2">
-            <dt className="text-xs text-[#65564A] mb-1">Phạm vi công bố hiện tại</dt>
-            <dd className="font-medium text-[#231B15]">
-              {displayOrPlaceholder(familyProfile.allowedScope)}
+          <div className="sm:col-span-2 space-y-1.5">
+            <dt className="text-xs text-[#65564A]">Phân tách quyền sử dụng</dt>
+            <dd className="text-xs text-[#231B15] leading-relaxed">
+              <strong>Thông tin mô tả:</strong> {DESCRIPTION_RIGHTS_NOTICE}
+            </dd>
+            <dd className="text-xs text-[#70452F] leading-relaxed">
+              <strong>Hình ảnh / bản số:</strong> {IMAGE_RIGHTS_UNVERIFIED_NOTICE}
             </dd>
           </div>
         </dl>
@@ -434,10 +446,7 @@ export const HomePage: React.FC = () => {
             {featuredArtifacts.map((artifact) => {
               const permittedPhotos = getPublicPermittedImages(artifact);
               const cover = permittedPhotos[0];
-              const officialSourceUrl =
-                artifact.referenceSources[0]?.urlOrCode ||
-                artifact.imageSources[0] ||
-                'https://www.baotangbacninh.vn/ds-hien-vat';
+              const sourceInfo = getPrimarySourceInfo(artifact);
 
               return (
                 <article
@@ -455,7 +464,7 @@ export const HomePage: React.FC = () => {
                     ) : (
                       <ArtifactPlaceholder
                         className="w-full h-full border-0"
-                        reason="Chưa xác minh quyền đăng lại ảnh"
+                        reason={IMAGE_RIGHTS_UNVERIFIED_NOTICE}
                       />
                     )}
                   </div>
@@ -463,35 +472,40 @@ export const HomePage: React.FC = () => {
                   <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                     <div className="space-y-2">
                       <div className="text-xs text-[#65564A] font-mono tabular-nums">
-                        {artifact.identifier} · {artifact.registrationNumber}
+                        {artifact.identifier} · Mã nguồn: {sourceInfo.registrationNumber}
                       </div>
                       <h3 className="font-editorial text-xl font-semibold text-[#231B15] line-clamp-2">
                         {artifact.title}
                       </h3>
                       <p className="text-xs text-[#65564A]">
-                        {artifact.currentStorageLocation} · {artifact.displayedCopyType}
+                        <strong>Đơn vị lưu giữ:</strong> {sourceInfo.custodian} · {artifact.displayedCopyType}
                       </p>
                       <p className="text-sm text-[#65564A] line-clamp-2 leading-relaxed">
                         {artifact.description}
                       </p>
+                      <p className="text-[11px] text-[#52624B] leading-snug">
+                        {artifact.descriptionRightsNote || DESCRIPTION_RIGHTS_NOTICE}
+                      </p>
                     </div>
 
-                    <div className="pt-3 border-t border-[#70452F]/10 flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <div className="pt-3 border-t border-[#70452F]/10 space-y-2 text-xs">
                       <a
-                        href={officialSourceUrl}
+                        href={sourceInfo.sourceUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[#52624B] font-medium hover:underline"
+                        className="inline-flex items-center gap-1 text-[#52624B] font-medium hover:underline break-all"
                       >
-                        <span>Mở nguồn gốc</span>
-                        <ExternalLink className="w-3 h-3" />
+                        <span>{sourceInfo.sourceUrl}</span>
+                        <ExternalLink className="w-3 h-3 shrink-0" />
                       </a>
-                      <Link
-                        to={`/ky-vat/${encodeURIComponent(artifact.id)}`}
-                        className="font-medium text-[#70452F] hover:underline"
-                      >
-                        Chi tiết hồ sơ →
-                      </Link>
+                      <div className="flex justify-end">
+                        <Link
+                          to={`/ky-vat/${encodeURIComponent(artifact.id)}`}
+                          className="font-medium text-[#70452F] hover:underline"
+                        >
+                          Chi tiết hồ sơ →
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </article>

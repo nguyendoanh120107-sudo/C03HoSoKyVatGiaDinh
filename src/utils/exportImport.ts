@@ -1,4 +1,9 @@
-import { DUBLIN_CORE_FIELDS, PROJECT_INFO } from '../data/constants';
+import {
+  DESCRIPTION_RIGHTS_NOTICE,
+  DUBLIN_CORE_FIELDS,
+  IMAGE_RIGHTS_UNVERIFIED_NOTICE,
+  PROJECT_INFO,
+} from '../data/constants';
 import {
   FamilyArchiveProfile,
   FamilyArtifact,
@@ -6,6 +11,8 @@ import {
 } from '../types/artifact';
 import {
   evaluateArtifactCompleteness,
+  getEffectivePermissionStatus,
+  hasValidPermissionEvidence,
   isArtifactPubliclyVisible,
   sanitizeArtifactForPublic,
 } from './completeness';
@@ -99,7 +106,10 @@ export function exportArtifactsToCsv(
     'permissionRole',
     'permissionDate',
     'permissionScope',
+    'permissionEvidence',
     'permissionStatus',
+    'descriptionRightsNote',
+    'imageRightsStatus',
     'revocationDate',
     'restrictedContent',
     'digitizedBy',
@@ -181,7 +191,7 @@ export function exportMissingFieldsReport(artifacts: FamilyArtifact[]): string {
     lines.push(
       `[${item.identifier}] ${item.title || '(Chưa có tên)'} — Trạng thái: ${
         eligible ? 'ĐỦ ĐIỀU KIỆN' : 'CHƯA ĐỦ ĐIỀU KIỆN'
-      } (${report.percentage}%, DC: ${report.dublinCoreFilled}/15, Quyền: ${item.permissionStatus})`
+      } (${report.percentage}%, DC: ${report.dublinCoreFilled}/15, Quyền ảnh: ${getEffectivePermissionStatus(item)})`
     );
     if (report.missingFields.length > 0) {
       lines.push(`  • Cần bổ sung / xác minh: ${report.missingFields.join(', ')}`);
@@ -202,13 +212,23 @@ export function exportStatsReport(
   profile: FamilyArchiveProfile
 ): string {
   const realOnly = artifacts.filter((a) => !a.isDemo);
-  const permitted = realOnly.filter((a) => a.permissionStatus === 'Đã được phép');
+  const withSources = realOnly.filter(
+    (a) => (a.referenceSources?.length ?? 0) > 0
+  );
+  const permitted = realOnly.filter(
+    (a) =>
+      getEffectivePermissionStatus(a) === 'Đã được phép' &&
+      hasValidPermissionEvidence(a)
+  );
   const dcComplete = realOnly.filter(
     (a) => evaluateArtifactCompleteness(a).isDublinCoreComplete
   );
   const totalImages = realOnly.reduce((sum, a) => sum + a.imageFiles.length, 0);
   const permittedImages = realOnly.reduce(
-    (sum, a) => sum + a.imageFiles.filter((i) => i.isPermittedForPublic).length,
+    (sum, a) =>
+      getEffectivePermissionStatus(a) === 'Đã được phép'
+        ? sum + a.imageFiles.filter((i) => i.isPermittedForPublic).length
+        : sum,
     0
   );
   const needConservation = realOnly.filter(
@@ -222,7 +242,9 @@ export function exportStatsReport(
     statistics: {
       totalRealArtifacts: realOnly.length,
       targetArtifacts: PROJECT_INFO.targetArtifactCount,
+      artifactsWithSourcesCount: withSources.length,
       permittedForPublicCount: permitted.length,
+      permittedImageArtifactsCount: permitted.length,
       dublinCoreCompleteCount: dcComplete.length,
       totalRealImagesCount: totalImages,
       permittedPublicImagesCount: permittedImages,
@@ -338,7 +360,12 @@ export function validateImportedJson(
       permissionRole: raw.permissionRole ?? '',
       permissionDate: raw.permissionDate ?? '',
       permissionScope: raw.permissionScope ?? '',
+      permissionEvidence: raw.permissionEvidence ?? '',
       permissionStatus: raw.permissionStatus ?? 'Chưa xin phép',
+      descriptionRightsNote:
+        raw.descriptionRightsNote ?? DESCRIPTION_RIGHTS_NOTICE,
+      imageRightsStatus:
+        raw.imageRightsStatus ?? IMAGE_RIGHTS_UNVERIFIED_NOTICE,
       restrictedContent: raw.restrictedContent ?? '',
       revocationDate: raw.revocationDate ?? '',
       verificationStatus: raw.verificationStatus ?? 'Chưa kiểm chứng',

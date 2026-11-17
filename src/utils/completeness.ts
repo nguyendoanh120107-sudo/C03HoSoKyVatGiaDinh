@@ -1,5 +1,63 @@
 import { DUBLIN_CORE_FIELDS } from '../data/constants';
-import { FamilyArtifact } from '../types/artifact';
+import { FamilyArtifact, PermissionStatus } from '../types/artifact';
+
+const UNVERIFIED_PLACEHOLDER_PATTERNS = [
+  'chưa cập nhật',
+  'chưa có văn bản',
+  'chưa xác nhận',
+  'chưa xác minh',
+  'không áp dụng',
+  'demo',
+];
+
+function isRealNonPlaceholderText(value?: string | null): boolean {
+  const trimmed = value?.trim() ?? '';
+  if (!trimmed) return false;
+  const lower = trimmed.toLowerCase();
+  return !UNVERIFIED_PLACEHOLDER_PATTERNS.some((p) => lower.includes(p));
+}
+
+export function hasValidPermissionEvidence(artifact: FamilyArtifact): boolean {
+  return (
+    isRealNonPlaceholderText(artifact.permissionGrantedBy) &&
+    isRealNonPlaceholderText(artifact.permissionDate) &&
+    isRealNonPlaceholderText(artifact.permissionScope) &&
+    isRealNonPlaceholderText(artifact.permissionEvidence)
+  );
+}
+
+export function getEffectivePermissionStatus(
+  artifact: FamilyArtifact
+): PermissionStatus {
+  if (
+    artifact.permissionStatus === 'Đã được phép' &&
+    !hasValidPermissionEvidence(artifact)
+  ) {
+    return 'Chưa xin phép';
+  }
+  return artifact.permissionStatus;
+}
+
+export function getPrimarySourceInfo(artifact: FamilyArtifact): {
+  custodian: string;
+  registrationNumber: string;
+  sourceUrl: string;
+} {
+  const firstRefUrl = artifact.referenceSources.find((s) =>
+    s.urlOrCode?.trim().startsWith('http')
+  )?.urlOrCode;
+  const fallbackImgSource = artifact.imageSources.find((u) =>
+    u?.trim().startsWith('http')
+  );
+  return {
+    custodian: artifact.currentStorageLocation?.trim() || 'Chưa cập nhật',
+    registrationNumber: artifact.registrationNumber?.trim() || artifact.identifier,
+    sourceUrl:
+      firstRefUrl ||
+      fallbackImgSource ||
+      'https://www.baotangbacninh.vn/ds-hien-vat',
+  };
+}
 
 export interface CompletenessReport {
   dublinCoreFilled: number;
@@ -65,11 +123,15 @@ export function evaluateArtifactCompleteness(artifact: FamilyArtifact): Complete
     missingFields.push('Tối thiểu 2 nguồn đối chiếu');
   }
 
-  const hasPermittedImages =
+  const hasPermission =
     artifact.permissionStatus === 'Đã được phép' &&
+    hasValidPermissionEvidence(artifact);
+
+  const hasPermittedImages =
+    hasPermission &&
     artifact.imageFiles.some((img) => img.isPermittedForPublic);
   if (!hasPermittedImages) {
-    missingFields.push('Ảnh thật được phép công bố');
+    missingFields.push('Bằng chứng & ảnh thật được phép công bố');
   }
 
   const totalItems = DUBLIN_CORE_FIELDS.length + REQUIRED_EXTENDED_LABELS.length + 2;
@@ -86,7 +148,7 @@ export function evaluateArtifactCompleteness(artifact: FamilyArtifact): Complete
     percentage,
     missingFields,
     hasSufficientSources: hasSources,
-    hasPermission: artifact.permissionStatus === 'Đã được phép',
+    hasPermission,
     needsConservation:
       artifact.originalCondition === 'Hư hại nhẹ' ||
       artifact.originalCondition === 'Hư hại nặng',
@@ -97,7 +159,7 @@ export function isArtifactPubliclyVisible(artifact: FamilyArtifact): boolean {
   if (artifact.isDraft || artifact.permissionStatus === 'Đã thu hồi quyền') {
     return false;
   }
-  if (artifact.permissionStatus === 'Đã được phép') {
+  if (getEffectivePermissionStatus(artifact) === 'Đã được phép') {
     return true;
   }
   // Verified public museum metadata records are visible for catalog inspection (without unpermitted photos!)
@@ -109,7 +171,7 @@ export function isArtifactPubliclyVisible(artifact: FamilyArtifact): boolean {
 }
 
 export function getPublicPermittedImages(artifact: FamilyArtifact) {
-  if (artifact.permissionStatus !== 'Đã được phép') {
+  if (getEffectivePermissionStatus(artifact) !== 'Đã được phép') {
     return [];
   }
   return artifact.imageFiles.filter((img) => img.isPermittedForPublic);

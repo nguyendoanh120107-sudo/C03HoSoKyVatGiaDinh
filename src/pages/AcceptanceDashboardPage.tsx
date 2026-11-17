@@ -4,7 +4,11 @@ import { CheckCircle2, XCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useArchive } from '../context/ArchiveContext';
 import { PROJECT_INFO } from '../data/constants';
-import { evaluateArtifactCompleteness } from '../utils/completeness';
+import {
+  evaluateArtifactCompleteness,
+  getEffectivePermissionStatus,
+  hasValidPermissionEvidence,
+} from '../utils/completeness';
 
 export const AcceptanceDashboardPage: React.FC = () => {
   const {
@@ -41,11 +45,17 @@ export const AcceptanceDashboardPage: React.FC = () => {
     const has3OfficialSources = sourceStats.officialSources >= 3;
     const allHavePermissionRecord =
       realArtifacts.length > 0 &&
-      realArtifacts.every((a) => Boolean(a.permissionStatus.trim()) && Boolean(a.rights.trim()));
+      realArtifacts.every(
+        (a) =>
+          Boolean(a.permissionStatus.trim()) &&
+          Boolean(a.rights.trim()) &&
+          (getEffectivePermissionStatus(a) !== 'Đã được phép' ||
+            hasValidPermissionEvidence(a))
+      );
     const hasPublicPermittedImages = realStats.permittedRealImages > 0;
     const geminiConfigured = Boolean(geminiHealth?.configured);
     const noUnpermittedPublished = realArtifacts.every((a) =>
-      a.permissionStatus !== 'Đã được phép'
+      getEffectivePermissionStatus(a) !== 'Đã được phép'
         ? a.imageFiles.every((img) => !img.isPermittedForPublic)
         : true
     );
@@ -131,7 +141,7 @@ export const AcceptanceDashboardPage: React.FC = () => {
         id: 12,
         label: '12. Có quyền công bố rõ ràng trên từng hồ sơ',
         passed: allHavePermissionRecord,
-        note: 'Có permissions.json và bảng theo dõi quyền riêng biệt (trạng thái hiện tại: Chưa xin phép đăng lại ảnh).',
+        note: `Tách bạch quyền mô tả & quyền đăng lại ảnh trong permissions.json (${realStats.permittedImageArtifactsCount}/${realStats.totalReal} hồ sơ có bằng chứng cấp phép ảnh).`,
       },
       {
         id: 13,
@@ -218,11 +228,13 @@ export const AcceptanceDashboardPage: React.FC = () => {
       {/* Top KPI Grid */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl border border-[#70452F]/15 p-5">
-          <p className="text-xs text-[#65564A]">Bản ghi thật đã xác minh</p>
+          <p className="text-xs text-[#65564A]">Hồ sơ có nguồn đối chiếu</p>
           <p className="text-3xl font-semibold text-[#70452F] tabular-nums mt-1">
-            {realStats.verifiedCount} / 15
+            {realStats.withSourcesCount} / 15
           </p>
-          <p className="text-xs text-[#65564A] mt-1">Nguồn chính: Bảo tàng Bắc Ninh</p>
+          <p className="text-xs text-[#65564A] mt-1 tabular-nums">
+            Đã xác minh: {realStats.verifiedCount} / 15 · Bảo tàng Bắc Ninh
+          </p>
         </div>
 
         <div className="bg-white rounded-xl border border-[#70452F]/15 p-5">
@@ -236,9 +248,11 @@ export const AcceptanceDashboardPage: React.FC = () => {
         </div>
 
         <div className="bg-white rounded-xl border border-[#70452F]/15 p-5">
-          <p className="text-xs text-[#65564A]">Hồ sơ đủ quyền & Ảnh công bố</p>
+          <p className="text-xs text-[#65564A]">
+            Hồ sơ được phép công bố ảnh (có bằng chứng)
+          </p>
           <p className="text-3xl font-semibold text-[#231B15] tabular-nums mt-1">
-            {realStats.permittedCount} / 15
+            {realStats.permittedImageArtifactsCount} / 15
           </p>
           <p className="text-xs text-[#65564A] mt-1 tabular-nums">
             Ảnh được phép: {realStats.permittedRealImages} ảnh

@@ -15,16 +15,16 @@
     "language": "Không có chữ viết trên hiện vật (Hồ sơ tiếng Việt)",
     "relation": "C03-00002, C03-00003, C03-00004, C03-00005",
     "coverage": "Làng Tam Sơn, tỉnh Bắc Ninh; cuối thế kỷ XIX – đầu thế kỷ XX",
-    "rights": "Chưa xác minh quyền đăng lại ảnh",
+    "rights": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
     "currentStorageLocation": "Bảo tàng Bắc Ninh (hệ thống kho lưu trữ và trưng bày của Bảo tàng Bắc Ninh)",
     "historicalStorageLocation": "Nhà gia đình đồng chí Ngô Gia Tự, làng Tam Sơn, Bắc Ninh",
     "displayedCopyType": "Bản số của gốc",
     "originalCondition": "Không rõ – nguồn chưa công bố tình trạng",
     "registrationNumber": "BTBN 451",
-    "permissionGrantedBy": "Chưa có văn bản xác nhận riêng",
+    "permissionGrantedBy": "",
     "permissionRole": "Đơn vị lưu giữ (Bảo tàng Bắc Ninh)",
     "permissionDate": "",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; chưa xác minh quyền đăng lại ảnh",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "permissionStatus": "Chưa xin phép",
     "restrictedContent": "Không sao chép hình ảnh từ website bảo tàng khi chưa có văn bản cho phép",
     "verificationStatus": "Đã kiểm chứng",
@@ -40,8 +40,15 @@
     "digitizedDate": "2026-11-17",
     "imageFiles": [],
     "imageCaptions": [],
-    "imageSources": ["https://www.baotangbacninh.vn/ds-hien-vat"],
-    "relatedArtifactIds": ["C03-00002", "C03-00003", "C03-00004", "C03-00005"],
+    "imageSources": [
+      "https://www.baotangbacninh.vn/ds-hien-vat"
+    ],
+    "relatedArtifactIds": [
+      "C03-00002",
+      "C03-00003",
+      "C03-00004",
+      "C03-00005"
+    ],
     "referenceSources": [
       {
         "id": "ref-001-a",
@@ -68,7 +75,10 @@
     "createdAt": "2026-11-17T00:10:00.000Z",
     "updatedAt": "2026-11-17T00:10:00.000Z",
     "isDraft": false,
-    "isDemo": false
+    "isDemo": false,
+    "descriptionRightsNote": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionEvidence": ""
   },
   {
     "id": "C03-00002",
@@ -86,16 +96,16 @@
     "language": "Không có chữ viết trên hiện vật",
     "relation": "C03-00001, C03-00003",
     "coverage": "Làng Tam Sơn, tỉnh Bắc Ninh; năm 1928",
-    "rights": "Chưa xác minh quyền đăng lại ảnh",
+    "rights": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
     "currentStorageLocation": "Bảo tàng Bắc Ninh",
     "historicalStorageLocation": "Nhà đồng chí Ngô Gia Tự, làng Tam Sơn, Bắc Ninh",
     "displayedCopyType": "Bản số của gốc",
     "originalCondition": "Không rõ – nguồn chưa công bố tình trạng",
     "registrationNumber": "BTBN 452",
-    "permissionGrantedBy": "Chưa có văn bản xác nhận riêng",
+    "permissionGrantedBy": "",
     "permissionRole": "Đơn vị lưu giữ (Bảo tàng Bắc Ninh)",
     "permissionDate": "",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; chưa xác minh quyền đăng lại ảnh",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "permissionStatus": "Chưa xin phép",
     "restrictedContent": "Không sao chép hình ảnh từ website bảo tàng khi chưa có văn bản cho phép",
     "verificationStatus": "Đã kiểm chứng",
@@ -111,8 +121,13 @@
     "digitizedDate": "2026-11-17",
     "imageFiles": [],
     "imageCaptions": [],
-    "imageSources": ["https://www.baotangbacninh.vn/ds-hien-vat"],
-    "relatedArtifactIds": ["C03-00001", "C03-00003"],
+    "imageSources": [
+      "https://www.baotangbacninh.vn/ds-hien-vat"
+    ],
+    "relatedArtifactIds": [
+      "C03-00001",
+      "C03-00003"
+    ],
     "referenceSources": [
       {
         "id": "ref-002-a",
@@ -139,7 +154,10 @@
     "createdAt": "2026-11-17T00:11:00.000Z",
     "updatedAt": "2026-11-17T00:11:00.000Z",
     "isDraft": false,
-    "isDemo": false
+    "isDemo": false,
+    "descriptionRightsNote": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionEvidence": ""
   },
   {
     "id": "C03-00003",
@@ -157,16 +175,16 @@
     "language": "Không có chữ viết",
     "relation": "C03-00001, C03-00004, C03-00005",
     "coverage": "Xã Tam Sơn, tỉnh Bắc Ninh; đầu thế kỷ XX",
-    "rights": "Chưa xác minh quyền đăng lại ảnh",
+    "rights": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
     "currentStorageLocation": "Kho lưu trữ Bảo tàng Bắc Ninh cơ sở 2",
     "historicalStorageLocation": "Gia đình đồng chí Ngô Gia Tự tại Tam Sơn, Bắc Ninh",
     "displayedCopyType": "Bản số của gốc",
     "originalCondition": "Không rõ – nguồn chưa công bố tình trạng",
     "registrationNumber": "BTBN 819",
-    "permissionGrantedBy": "Chưa có văn bản xác nhận riêng",
+    "permissionGrantedBy": "",
     "permissionRole": "Đơn vị lưu giữ (Bảo tàng Bắc Ninh)",
     "permissionDate": "",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; chưa xác minh quyền đăng lại ảnh",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "permissionStatus": "Chưa xin phép",
     "restrictedContent": "Không sao chép hình ảnh từ website bảo tàng khi chưa có văn bản cho phép",
     "verificationStatus": "Đã kiểm chứng",
@@ -182,8 +200,14 @@
     "digitizedDate": "2026-11-17",
     "imageFiles": [],
     "imageCaptions": [],
-    "imageSources": ["https://www.baotangbacninh.vn/ds-hien-vat"],
-    "relatedArtifactIds": ["C03-00001", "C03-00004", "C03-00005"],
+    "imageSources": [
+      "https://www.baotangbacninh.vn/ds-hien-vat"
+    ],
+    "relatedArtifactIds": [
+      "C03-00001",
+      "C03-00004",
+      "C03-00005"
+    ],
     "referenceSources": [
       {
         "id": "ref-003-a",
@@ -210,7 +234,10 @@
     "createdAt": "2026-11-17T00:12:00.000Z",
     "updatedAt": "2026-11-17T00:12:00.000Z",
     "isDraft": false,
-    "isDemo": false
+    "isDemo": false,
+    "descriptionRightsNote": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionEvidence": ""
   },
   {
     "id": "C03-00004",
@@ -228,16 +255,16 @@
     "language": "Không có chữ viết",
     "relation": "C03-00003, C03-00005",
     "coverage": "Xã Tam Sơn, tỉnh Bắc Ninh; đầu thế kỷ XX",
-    "rights": "Chưa xác minh quyền đăng lại ảnh",
+    "rights": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
     "currentStorageLocation": "Kho lưu trữ Bảo tàng Bắc Ninh cơ sở 2",
     "historicalStorageLocation": "Gia đình đồng chí Ngô Gia Tự tại Tam Sơn, Bắc Ninh",
     "displayedCopyType": "Bản số của gốc",
     "originalCondition": "Không rõ – nguồn chưa công bố tình trạng",
     "registrationNumber": "BTBN 820",
-    "permissionGrantedBy": "Chưa có văn bản xác nhận riêng",
+    "permissionGrantedBy": "",
     "permissionRole": "Đơn vị lưu giữ (Bảo tàng Bắc Ninh)",
     "permissionDate": "",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; chưa xác minh quyền đăng lại ảnh",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "permissionStatus": "Chưa xin phép",
     "restrictedContent": "Không sao chép hình ảnh từ website bảo tàng khi chưa có văn bản cho phép",
     "verificationStatus": "Đã kiểm chứng",
@@ -253,8 +280,13 @@
     "digitizedDate": "2026-11-17",
     "imageFiles": [],
     "imageCaptions": [],
-    "imageSources": ["https://www.baotangbacninh.vn/ds-hien-vat"],
-    "relatedArtifactIds": ["C03-00003", "C03-00005"],
+    "imageSources": [
+      "https://www.baotangbacninh.vn/ds-hien-vat"
+    ],
+    "relatedArtifactIds": [
+      "C03-00003",
+      "C03-00005"
+    ],
     "referenceSources": [
       {
         "id": "ref-004-a",
@@ -281,7 +313,10 @@
     "createdAt": "2026-11-17T00:13:00.000Z",
     "updatedAt": "2026-11-17T00:13:00.000Z",
     "isDraft": false,
-    "isDemo": false
+    "isDemo": false,
+    "descriptionRightsNote": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionEvidence": ""
   },
   {
     "id": "C03-00005",
@@ -299,16 +334,16 @@
     "language": "Không có chữ viết",
     "relation": "C03-00003, C03-00004",
     "coverage": "Xã Tam Sơn, tỉnh Bắc Ninh; đầu thế kỷ XX",
-    "rights": "Chưa xác minh quyền đăng lại ảnh",
+    "rights": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
     "currentStorageLocation": "Kho lưu trữ Bảo tàng Bắc Ninh cơ sở 2",
     "historicalStorageLocation": "Gia đình đồng chí Ngô Gia Tự tại Tam Sơn, Bắc Ninh",
     "displayedCopyType": "Bản số của gốc",
     "originalCondition": "Không rõ – nguồn chưa công bố tình trạng",
     "registrationNumber": "BTBN 821",
-    "permissionGrantedBy": "Chưa có văn bản xác nhận riêng",
+    "permissionGrantedBy": "",
     "permissionRole": "Đơn vị lưu giữ (Bảo tàng Bắc Ninh)",
     "permissionDate": "",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; chưa xác minh quyền đăng lại ảnh",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "permissionStatus": "Chưa xin phép",
     "restrictedContent": "Không sao chép hình ảnh từ website bảo tàng khi chưa có văn bản cho phép",
     "verificationStatus": "Đã kiểm chứng",
@@ -324,8 +359,13 @@
     "digitizedDate": "2026-11-17",
     "imageFiles": [],
     "imageCaptions": [],
-    "imageSources": ["https://www.baotangbacninh.vn/ds-hien-vat"],
-    "relatedArtifactIds": ["C03-00003", "C03-00004"],
+    "imageSources": [
+      "https://www.baotangbacninh.vn/ds-hien-vat"
+    ],
+    "relatedArtifactIds": [
+      "C03-00003",
+      "C03-00004"
+    ],
     "referenceSources": [
       {
         "id": "ref-005-a",
@@ -352,7 +392,10 @@
     "createdAt": "2026-11-17T00:14:00.000Z",
     "updatedAt": "2026-11-17T00:14:00.000Z",
     "isDraft": false,
-    "isDemo": false
+    "isDemo": false,
+    "descriptionRightsNote": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionEvidence": ""
   },
   {
     "id": "C03-00006",
@@ -370,16 +413,16 @@
     "language": "Tiếng Việt",
     "relation": "C03-00009",
     "coverage": "Xã Thụy Hòa, huyện Yên Phong, tỉnh Bắc Ninh; năm 1988–1989",
-    "rights": "Chưa xác minh quyền đăng lại ảnh",
+    "rights": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
     "currentStorageLocation": "Bảo tàng Bắc Ninh",
     "historicalStorageLocation": "Gia đình ông Nguyễn Khắc Hoằng, xã Thụy Hòa, huyện Yên Phong, tỉnh Bắc Ninh",
     "displayedCopyType": "Bản số của gốc",
     "originalCondition": "Không rõ – nguồn chưa công bố tình trạng",
     "registrationNumber": "BTBN 1120",
-    "permissionGrantedBy": "Chưa có văn bản xác nhận riêng",
+    "permissionGrantedBy": "",
     "permissionRole": "Đơn vị lưu giữ (Bảo tàng Bắc Ninh)",
     "permissionDate": "",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; chưa xác minh quyền đăng lại ảnh",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "permissionStatus": "Chưa xin phép",
     "restrictedContent": "Không sao chép hình ảnh sổ lương thực khi chưa được cấp phép",
     "verificationStatus": "Đã kiểm chứng",
@@ -395,8 +438,12 @@
     "digitizedDate": "2026-11-17",
     "imageFiles": [],
     "imageCaptions": [],
-    "imageSources": ["https://www.baotangbacninh.vn/ds-hien-vat"],
-    "relatedArtifactIds": ["C03-00009"],
+    "imageSources": [
+      "https://www.baotangbacninh.vn/ds-hien-vat"
+    ],
+    "relatedArtifactIds": [
+      "C03-00009"
+    ],
     "referenceSources": [
       {
         "id": "ref-006-a",
@@ -423,7 +470,10 @@
     "createdAt": "2026-11-17T00:15:00.000Z",
     "updatedAt": "2026-11-17T00:15:00.000Z",
     "isDraft": false,
-    "isDemo": false
+    "isDemo": false,
+    "descriptionRightsNote": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionEvidence": ""
   },
   {
     "id": "C03-00007",
@@ -441,16 +491,16 @@
     "language": "Tiếng Việt",
     "relation": "C03-00008",
     "coverage": "Khu phố Thị Cầu, thị xã Bắc Ninh; năm 1971–1973",
-    "rights": "Chưa xác minh quyền đăng lại ảnh",
+    "rights": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
     "currentStorageLocation": "Bảo tàng Bắc Ninh",
     "historicalStorageLocation": "Gia đình liệt sĩ Nguyễn Trung, khu phố Thị Cầu, thị xã Bắc Ninh",
     "displayedCopyType": "Bản số của gốc",
     "originalCondition": "Không rõ – nguồn chưa công bố tình trạng",
     "registrationNumber": "1231 (Bảo tàng Bắc Ninh)",
-    "permissionGrantedBy": "Chưa có văn bản xác nhận riêng",
+    "permissionGrantedBy": "",
     "permissionRole": "Đơn vị lưu giữ (Bảo tàng Bắc Ninh)",
     "permissionDate": "",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; chưa xác minh quyền đăng lại ảnh",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "permissionStatus": "Chưa xin phép",
     "restrictedContent": "Không sao chép hình ảnh văn bản khi chưa có văn bản cho phép",
     "verificationStatus": "Đã kiểm chứng",
@@ -466,8 +516,12 @@
     "digitizedDate": "2026-11-17",
     "imageFiles": [],
     "imageCaptions": [],
-    "imageSources": ["https://www.baotangbacninh.vn/ds-hien-vat"],
-    "relatedArtifactIds": ["C03-00008"],
+    "imageSources": [
+      "https://www.baotangbacninh.vn/ds-hien-vat"
+    ],
+    "relatedArtifactIds": [
+      "C03-00008"
+    ],
     "referenceSources": [
       {
         "id": "ref-007-a",
@@ -494,7 +548,10 @@
     "createdAt": "2026-11-17T00:16:00.000Z",
     "updatedAt": "2026-11-17T00:16:00.000Z",
     "isDraft": false,
-    "isDemo": false
+    "isDemo": false,
+    "descriptionRightsNote": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionEvidence": ""
   },
   {
     "id": "C03-00008",
@@ -512,16 +569,16 @@
     "language": "Tiếng Việt",
     "relation": "C03-00007",
     "coverage": "Tương Giang / Tam Sơn, Bắc Ninh — Chiến trường Trường Sơn & Liên Xô (cũ); 1955–1973",
-    "rights": "Chưa xác minh quyền đăng lại ảnh",
+    "rights": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
     "currentStorageLocation": "Bảo tàng Bắc Ninh",
     "historicalStorageLocation": "Gia đình bác sĩ Tạ Lưu (xã Tương Giang, Từ Sơn, Bắc Ninh)",
     "displayedCopyType": "Bản số của gốc",
     "originalCondition": "Không rõ – nguồn chưa công bố tình trạng",
     "registrationNumber": "1304 (Bảo tàng Bắc Ninh)",
-    "permissionGrantedBy": "Chưa có văn bản xác nhận riêng",
+    "permissionGrantedBy": "",
     "permissionRole": "Đơn vị lưu giữ (Bảo tàng Bắc Ninh)",
     "permissionDate": "",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; chưa xác minh quyền đăng lại ảnh",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "permissionStatus": "Chưa xin phép",
     "restrictedContent": "Không sao chép hình ảnh thư tay khi chưa có văn bản cho phép",
     "verificationStatus": "Đã kiểm chứng",
@@ -537,8 +594,12 @@
     "digitizedDate": "2026-11-17",
     "imageFiles": [],
     "imageCaptions": [],
-    "imageSources": ["https://www.baotangbacninh.vn/ds-hien-vat"],
-    "relatedArtifactIds": ["C03-00007"],
+    "imageSources": [
+      "https://www.baotangbacninh.vn/ds-hien-vat"
+    ],
+    "relatedArtifactIds": [
+      "C03-00007"
+    ],
     "referenceSources": [
       {
         "id": "ref-008-a",
@@ -565,7 +626,10 @@
     "createdAt": "2026-11-17T00:17:00.000Z",
     "updatedAt": "2026-11-17T00:17:00.000Z",
     "isDraft": false,
-    "isDemo": false
+    "isDemo": false,
+    "descriptionRightsNote": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionEvidence": ""
   },
   {
     "id": "C03-00009",
@@ -583,16 +647,16 @@
     "language": "Tiếng Việt",
     "relation": "C03-00006",
     "coverage": "Tỉnh Bắc Ninh; nửa sau thế kỷ XX",
-    "rights": "Chưa xác minh quyền đăng lại ảnh",
+    "rights": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
     "currentStorageLocation": "Bảo tàng Bắc Ninh",
     "historicalStorageLocation": "Hộ nông dân xã viên tại địa phương (Bắc Ninh)",
     "displayedCopyType": "Bản số của gốc",
     "originalCondition": "Không rõ – nguồn chưa công bố tình trạng",
     "registrationNumber": "1140 (Bảo tàng Bắc Ninh)",
-    "permissionGrantedBy": "Chưa có văn bản xác nhận riêng",
+    "permissionGrantedBy": "",
     "permissionRole": "Đơn vị lưu giữ (Bảo tàng Bắc Ninh)",
     "permissionDate": "",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; chưa xác minh quyền đăng lại ảnh",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "permissionStatus": "Chưa xin phép",
     "restrictedContent": "Không sao chép hình ảnh hiện vật khi chưa được cấp phép",
     "verificationStatus": "Đã kiểm chứng",
@@ -608,8 +672,12 @@
     "digitizedDate": "2026-11-17",
     "imageFiles": [],
     "imageCaptions": [],
-    "imageSources": ["https://www.baotangbacninh.vn/ds-hien-vat"],
-    "relatedArtifactIds": ["C03-00006"],
+    "imageSources": [
+      "https://www.baotangbacninh.vn/ds-hien-vat"
+    ],
+    "relatedArtifactIds": [
+      "C03-00006"
+    ],
     "referenceSources": [
       {
         "id": "ref-009-a",
@@ -636,7 +704,10 @@
     "createdAt": "2026-11-17T00:18:00.000Z",
     "updatedAt": "2026-11-17T00:18:00.000Z",
     "isDraft": false,
-    "isDemo": false
+    "isDemo": false,
+    "descriptionRightsNote": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionEvidence": ""
   },
   {
     "id": "C03-00010",
@@ -654,16 +725,16 @@
     "language": "Không có chữ viết",
     "relation": "C03-00011",
     "coverage": "Làng gốm Phù Lãng, huyện Quế Võ (nay thuộc thị xã Quế Võ), tỉnh Bắc Ninh",
-    "rights": "Chưa xác minh quyền đăng lại ảnh",
+    "rights": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
     "currentStorageLocation": "Bảo tàng Bắc Ninh",
     "historicalStorageLocation": "Nhân dân thôn Phù Lãng, bên bờ sông Cầu, tỉnh Bắc Ninh",
     "displayedCopyType": "Bản số của gốc",
     "originalCondition": "Không rõ – nguồn chưa công bố tình trạng",
     "registrationNumber": "BTBN 166",
-    "permissionGrantedBy": "Chưa có văn bản xác nhận riêng",
+    "permissionGrantedBy": "",
     "permissionRole": "Đơn vị lưu giữ (Bảo tàng Bắc Ninh)",
     "permissionDate": "",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; chưa xác minh quyền đăng lại ảnh",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "permissionStatus": "Chưa xin phép",
     "restrictedContent": "Không sao chép hình ảnh hiện vật khi chưa được cấp phép",
     "verificationStatus": "Đã kiểm chứng",
@@ -679,8 +750,12 @@
     "digitizedDate": "2026-11-17",
     "imageFiles": [],
     "imageCaptions": [],
-    "imageSources": ["https://www.baotangbacninh.vn/ds-hien-vat"],
-    "relatedArtifactIds": ["C03-00011"],
+    "imageSources": [
+      "https://www.baotangbacninh.vn/ds-hien-vat"
+    ],
+    "relatedArtifactIds": [
+      "C03-00011"
+    ],
     "referenceSources": [
       {
         "id": "ref-010-a",
@@ -707,7 +782,10 @@
     "createdAt": "2026-11-17T00:19:00.000Z",
     "updatedAt": "2026-11-17T00:19:00.000Z",
     "isDraft": false,
-    "isDemo": false
+    "isDemo": false,
+    "descriptionRightsNote": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionEvidence": ""
   },
   {
     "id": "C03-00011",
@@ -725,16 +803,16 @@
     "language": "Không có chữ viết",
     "relation": "C03-00010",
     "coverage": "Làng Phù Lãng, tỉnh Bắc Ninh; ngày 20/2/1950",
-    "rights": "Chưa xác minh quyền đăng lại ảnh",
+    "rights": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
     "currentStorageLocation": "Bảo tàng Bắc Ninh",
     "historicalStorageLocation": "Làng Phù Lãng, tỉnh Bắc Ninh",
     "displayedCopyType": "Bản số của gốc",
     "originalCondition": "Không rõ – nguồn chưa công bố tình trạng",
     "registrationNumber": "BTBN 165",
-    "permissionGrantedBy": "Chưa có văn bản xác nhận riêng",
+    "permissionGrantedBy": "",
     "permissionRole": "Đơn vị lưu giữ (Bảo tàng Bắc Ninh)",
     "permissionDate": "",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; chưa xác minh quyền đăng lại ảnh",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "permissionStatus": "Chưa xin phép",
     "restrictedContent": "Không sao chép hình ảnh hiện vật khi chưa được cấp phép",
     "verificationStatus": "Đã kiểm chứng",
@@ -750,8 +828,12 @@
     "digitizedDate": "2026-11-17",
     "imageFiles": [],
     "imageCaptions": [],
-    "imageSources": ["https://www.baotangbacninh.vn/ds-hien-vat"],
-    "relatedArtifactIds": ["C03-00010"],
+    "imageSources": [
+      "https://www.baotangbacninh.vn/ds-hien-vat"
+    ],
+    "relatedArtifactIds": [
+      "C03-00010"
+    ],
     "referenceSources": [
       {
         "id": "ref-011-a",
@@ -778,7 +860,10 @@
     "createdAt": "2026-11-17T00:20:00.000Z",
     "updatedAt": "2026-11-17T00:20:00.000Z",
     "isDraft": false,
-    "isDemo": false
+    "isDemo": false,
+    "descriptionRightsNote": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionEvidence": ""
   },
   {
     "id": "C03-00012",
@@ -796,16 +881,16 @@
     "language": "Chưa xác định theo tài liệu đã tra cứu",
     "relation": "C03-00013",
     "coverage": "Tỉnh Bắc Ninh; năm 1967",
-    "rights": "Chưa xác minh quyền đăng lại ảnh",
+    "rights": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
     "currentStorageLocation": "Bảo tàng Bắc Ninh",
     "historicalStorageLocation": "Địa bàn tỉnh Bắc Ninh (nơi máy bay rơi năm 1967)",
     "displayedCopyType": "Bản số của gốc",
     "originalCondition": "Không rõ – nguồn chưa công bố tình trạng",
     "registrationNumber": "BTBN 407",
-    "permissionGrantedBy": "Chưa có văn bản xác nhận riêng",
+    "permissionGrantedBy": "",
     "permissionRole": "Đơn vị lưu giữ (Bảo tàng Bắc Ninh)",
     "permissionDate": "",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; chưa xác minh quyền đăng lại ảnh",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "permissionStatus": "Chưa xin phép",
     "restrictedContent": "Không sao chép hình ảnh hiện vật khi chưa được cấp phép",
     "verificationStatus": "Đã kiểm chứng",
@@ -821,8 +906,12 @@
     "digitizedDate": "2026-11-17",
     "imageFiles": [],
     "imageCaptions": [],
-    "imageSources": ["https://www.baotangbacninh.vn/ds-hien-vat"],
-    "relatedArtifactIds": ["C03-00013"],
+    "imageSources": [
+      "https://www.baotangbacninh.vn/ds-hien-vat"
+    ],
+    "relatedArtifactIds": [
+      "C03-00013"
+    ],
     "referenceSources": [
       {
         "id": "ref-012-a",
@@ -849,7 +938,10 @@
     "createdAt": "2026-11-17T00:21:00.000Z",
     "updatedAt": "2026-11-17T00:21:00.000Z",
     "isDraft": false,
-    "isDemo": false
+    "isDemo": false,
+    "descriptionRightsNote": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionEvidence": ""
   },
   {
     "id": "C03-00013",
@@ -867,16 +959,16 @@
     "language": "Chưa xác định theo tài liệu đã tra cứu",
     "relation": "C03-00012",
     "coverage": "Thôn Ất, xã Hạp Lĩnh, huyện Tiên Du (nay thuộc TP. Bắc Ninh), tỉnh Bắc Ninh; năm 1967",
-    "rights": "Chưa xác minh quyền đăng lại ảnh",
+    "rights": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
     "currentStorageLocation": "Bảo tàng Bắc Ninh",
     "historicalStorageLocation": "Cánh đồng thôn Ất, xã Hạp Lĩnh, huyện Tiên Du, tỉnh Bắc Ninh",
     "displayedCopyType": "Bản số của gốc",
     "originalCondition": "Không rõ – nguồn chưa công bố tình trạng",
     "registrationNumber": "BTBN 438",
-    "permissionGrantedBy": "Chưa có văn bản xác nhận riêng",
+    "permissionGrantedBy": "",
     "permissionRole": "Đơn vị lưu giữ (Bảo tàng Bắc Ninh)",
     "permissionDate": "",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; chưa xác minh quyền đăng lại ảnh",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "permissionStatus": "Chưa xin phép",
     "restrictedContent": "Không sao chép hình ảnh hiện vật khi chưa được cấp phép",
     "verificationStatus": "Đã kiểm chứng",
@@ -892,8 +984,12 @@
     "digitizedDate": "2026-11-17",
     "imageFiles": [],
     "imageCaptions": [],
-    "imageSources": ["https://www.baotangbacninh.vn/ds-hien-vat"],
-    "relatedArtifactIds": ["C03-00012"],
+    "imageSources": [
+      "https://www.baotangbacninh.vn/ds-hien-vat"
+    ],
+    "relatedArtifactIds": [
+      "C03-00012"
+    ],
     "referenceSources": [
       {
         "id": "ref-013-a",
@@ -920,7 +1016,10 @@
     "createdAt": "2026-11-17T00:22:00.000Z",
     "updatedAt": "2026-11-17T00:22:00.000Z",
     "isDraft": false,
-    "isDemo": false
+    "isDemo": false,
+    "descriptionRightsNote": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionEvidence": ""
   },
   {
     "id": "C03-00014",
@@ -938,16 +1037,16 @@
     "language": "Không có chữ viết",
     "relation": "C03-00015",
     "coverage": "Vùng đồng bằng Bắc Bộ (sưu tầm từ Mai Lâm, Đông Anh về Bảo tàng Bắc Ninh cơ sở 2)",
-    "rights": "Chưa xác minh quyền đăng lại ảnh",
+    "rights": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
     "currentStorageLocation": "Bảo tàng Bắc Ninh cơ sở 2",
     "historicalStorageLocation": "Gia đình bà Trần Thị Lý, xã Mai Lâm, huyện Đông Anh, Hà Nội (trước năm 2022)",
     "displayedCopyType": "Bản số của gốc",
     "originalCondition": "Không rõ – nguồn chưa công bố tình trạng",
     "registrationNumber": "Chưa nêu số kiểm kê cụ thể trên bài viết công khai",
-    "permissionGrantedBy": "Chưa có văn bản xác nhận riêng",
+    "permissionGrantedBy": "",
     "permissionRole": "Đơn vị lưu giữ (Bảo tàng Bắc Ninh)",
     "permissionDate": "",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; chưa xác minh quyền đăng lại ảnh",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "permissionStatus": "Chưa xin phép",
     "restrictedContent": "Không sao chép hình ảnh hiện vật khi chưa được cấp phép",
     "verificationStatus": "Đã kiểm chứng",
@@ -963,8 +1062,12 @@
     "digitizedDate": "2026-11-17",
     "imageFiles": [],
     "imageCaptions": [],
-    "imageSources": ["https://www.baotangbacninh.vn/"],
-    "relatedArtifactIds": ["C03-00015"],
+    "imageSources": [
+      "https://www.baotangbacninh.vn/"
+    ],
+    "relatedArtifactIds": [
+      "C03-00015"
+    ],
     "referenceSources": [
       {
         "id": "ref-014-a",
@@ -991,7 +1094,10 @@
     "createdAt": "2026-11-17T00:23:00.000Z",
     "updatedAt": "2026-11-17T00:23:00.000Z",
     "isDraft": false,
-    "isDemo": false
+    "isDemo": false,
+    "descriptionRightsNote": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionEvidence": ""
   },
   {
     "id": "C03-00015",
@@ -1009,16 +1115,16 @@
     "language": "Chữ Hán – Nôm (Hồ sơ biên mục tiếng Việt)",
     "relation": "C03-00014",
     "coverage": "Chùa Đồng Nhân, thành phố Bắc Ninh, tỉnh Bắc Ninh; năm 1879–1885",
-    "rights": "Chưa xác minh quyền đăng lại ảnh",
+    "rights": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
     "currentStorageLocation": "Bảo tàng tỉnh Bắc Ninh",
     "historicalStorageLocation": "Chùa Đồng Nhân, Bắc Ninh (1879–1885)",
     "displayedCopyType": "Bản số của gốc",
     "originalCondition": "Không rõ – nguồn chưa công bố tình trạng",
     "registrationNumber": "Bảo vật Quốc gia (Đợt 10, tháng 12/2021 — lưu giữ tại Bảo tàng Bắc Ninh)",
-    "permissionGrantedBy": "Chưa có văn bản xác nhận riêng",
+    "permissionGrantedBy": "",
     "permissionRole": "Đơn vị lưu giữ (Bảo tàng Bắc Ninh)",
     "permissionDate": "",
-    "permissionScope": "Chỉ dẫn nguồn siêu dữ liệu công khai; chưa xác minh quyền đăng lại ảnh",
+    "permissionScope": "Chỉ tổng hợp thông tin mô tả từ nguồn công khai có dẫn chứng; chưa xác minh quyền đăng lại hình ảnh",
     "permissionStatus": "Chưa xin phép",
     "restrictedContent": "Không sao chép hình ảnh hiện vật khi chưa được cấp phép",
     "verificationStatus": "Đã kiểm chứng",
@@ -1034,8 +1140,12 @@
     "digitizedDate": "2026-11-17",
     "imageFiles": [],
     "imageCaptions": [],
-    "imageSources": ["https://www.baotangbacninh.vn/"],
-    "relatedArtifactIds": ["C03-00014"],
+    "imageSources": [
+      "https://www.baotangbacninh.vn/"
+    ],
+    "relatedArtifactIds": [
+      "C03-00014"
+    ],
     "referenceSources": [
       {
         "id": "ref-015-a",
@@ -1072,6 +1182,9 @@
     "createdAt": "2026-11-17T00:24:00.000Z",
     "updatedAt": "2026-11-17T00:24:00.000Z",
     "isDraft": false,
-    "isDemo": false
+    "isDemo": false,
+    "descriptionRightsNote": "Thông tin mô tả được tổng hợp từ nguồn công khai có dẫn chứng. Chưa xác minh quyền sao chép nguyên văn nội dung được bảo hộ.",
+    "imageRightsStatus": "Chưa xác minh quyền đăng lại hình ảnh. Vui lòng xem ảnh tại nguồn chính thức.",
+    "permissionEvidence": ""
   }
 ]

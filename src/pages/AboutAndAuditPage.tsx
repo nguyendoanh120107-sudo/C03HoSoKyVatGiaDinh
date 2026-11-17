@@ -132,9 +132,15 @@ export const AboutAndAuditPage: React.FC = () => {
               </dd>
             </div>
             <div className="py-2.5 flex justify-between gap-4">
-              <dt className="text-[#65564A]">Bản ghi đã xác minh từ nguồn</dt>
+              <dt className="text-[#65564A]">Hồ sơ có nguồn đối chiếu công khai</dt>
+              <dd className="font-semibold text-[#52624B] tabular-nums text-right">
+                {realStats.withSourcesCount} / 15 hồ sơ (Xác minh: {realStats.verifiedCount})
+              </dd>
+            </div>
+            <div className="py-2.5 flex justify-between gap-4">
+              <dt className="text-[#65564A]">Hồ sơ được phép công bố ảnh</dt>
               <dd className="font-semibold text-[#70452F] tabular-nums text-right">
-                {realStats.verifiedCount} / 15 hồ sơ (Tổng {realStats.totalReal})
+                {realStats.permittedImageArtifactsCount} / 15 hồ sơ ({realStats.permittedRealImages} ảnh)
               </dd>
             </div>
             <div className="py-2.5 flex justify-between gap-4">
@@ -144,9 +150,11 @@ export const AboutAndAuditPage: React.FC = () => {
               </dd>
             </div>
             <div className="py-2.5 flex justify-between gap-4">
-              <dt className="text-[#65564A]">Người cho phép / Quyền ảnh</dt>
+              <dt className="text-[#65564A]">Người / Đơn vị cho phép đăng ảnh</dt>
               <dd className="font-medium text-right">
-                {displayOrPlaceholder(familyProfile.authorizingPerson)}
+                {familyProfile.authorizingPerson?.trim()
+                  ? familyProfile.authorizingPerson
+                  : 'Chưa cập nhật (không tự điền)'}
               </dd>
             </div>
             <div className="py-2.5 flex justify-between gap-4">

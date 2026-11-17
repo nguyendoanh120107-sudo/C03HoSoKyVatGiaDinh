@@ -32,7 +32,11 @@ import {
   PermissionRegistryEntry,
   ReferenceSourceRegistryItem,
 } from '../types/artifact';
-import { evaluateArtifactCompleteness } from '../utils/completeness';
+import {
+  evaluateArtifactCompleteness,
+  getEffectivePermissionStatus,
+  hasValidPermissionEvidence,
+} from '../utils/completeness';
 
 interface ArchiveContextValue {
   isLoading: boolean;
@@ -52,7 +56,9 @@ interface ArchiveContextValue {
   realStats: {
     totalReal: number;
     verifiedCount: number;
+    withSourcesCount: number;
     permittedCount: number;
+    permittedImageArtifactsCount: number;
     dublinCoreCompleteCount: number;
     totalRealImages: number;
     permittedRealImages: number;
@@ -243,7 +249,8 @@ export const ArchiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const realStats = useMemo(() => {
     let verifiedCount = 0;
-    let permittedCount = 0;
+    let withSourcesCount = 0;
+    let permittedImageArtifactsCount = 0;
     let dublinCoreCompleteCount = 0;
     let totalRealImages = 0;
     let permittedRealImages = 0;
@@ -252,6 +259,12 @@ export const ArchiveProvider: React.FC<{ children: React.ReactNode }> = ({
 
     for (const a of realArtifacts) {
       const rep = evaluateArtifactCompleteness(a);
+      const effectivePerm = getEffectivePermissionStatus(a);
+      const hasEvidence = hasValidPermissionEvidence(a);
+
+      if (a.referenceSources.length > 0) {
+        withSourcesCount += 1;
+      }
       if (
         (a.verificationStatus === 'Đã xác minh' ||
           a.verificationStatus === 'Đã kiểm chứng') &&
@@ -260,8 +273,8 @@ export const ArchiveProvider: React.FC<{ children: React.ReactNode }> = ({
       ) {
         verifiedCount += 1;
       }
-      if (a.permissionStatus === 'Đã được phép' && !a.isDraft) {
-        permittedCount += 1;
+      if (effectivePerm === 'Đã được phép' && hasEvidence && !a.isDraft) {
+        permittedImageArtifactsCount += 1;
       }
       if (rep.isDublinCoreComplete) {
         dublinCoreCompleteCount += 1;
@@ -273,7 +286,7 @@ export const ArchiveProvider: React.FC<{ children: React.ReactNode }> = ({
         sufficientSourcesCount += 1;
       }
       totalRealImages += a.imageFiles.length;
-      if (a.permissionStatus === 'Đã được phép') {
+      if (effectivePerm === 'Đã được phép' && hasEvidence) {
         permittedRealImages += a.imageFiles.filter((i) => i.isPermittedForPublic).length;
       }
     }
@@ -281,7 +294,9 @@ export const ArchiveProvider: React.FC<{ children: React.ReactNode }> = ({
     return {
       totalReal: realArtifacts.length,
       verifiedCount,
-      permittedCount,
+      withSourcesCount,
+      permittedCount: permittedImageArtifactsCount,
+      permittedImageArtifactsCount,
       dublinCoreCompleteCount,
       totalRealImages,
       permittedRealImages,

@@ -19,12 +19,18 @@ import {
 import { motion } from 'motion/react';
 import { ArtifactPlaceholder } from '../components/ArtifactPlaceholder';
 import { useArchive } from '../context/ArchiveContext';
-import { DUBLIN_CORE_FIELDS } from '../data/constants';
+import {
+  DESCRIPTION_RIGHTS_NOTICE,
+  DUBLIN_CORE_FIELDS,
+  IMAGE_RIGHTS_UNVERIFIED_NOTICE,
+} from '../data/constants';
 import { getOriginalImageBlob } from '../services/db';
 import { requestGeminiAssist } from '../services/geminiService';
 import {
   displayOrPlaceholder,
   evaluateArtifactCompleteness,
+  getEffectivePermissionStatus,
+  getPrimarySourceInfo,
   getPublicPermittedImages,
   isArtifactPubliclyVisible,
 } from '../utils/completeness';
@@ -101,8 +107,9 @@ export const ArtifactDetailPage: React.FC = () => {
     );
   }
 
+  const effectivePermission = getEffectivePermissionStatus(artifact);
   const visibleImages =
-    artifact.permissionStatus === 'Đã được phép'
+    effectivePermission === 'Đã được phép'
       ? getPublicPermittedImages(artifact)
       : isPublicPreview
         ? []
@@ -110,10 +117,8 @@ export const ArtifactDetailPage: React.FC = () => {
 
   const currentImg = visibleImages[activeImgIdx];
   const completeness = evaluateArtifactCompleteness(artifact);
-  const officialSourceUrl =
-    artifact.referenceSources[0]?.urlOrCode ||
-    artifact.imageSources[0] ||
-    'https://www.baotangbacninh.vn/ds-hien-vat';
+  const sourceInfo = getPrimarySourceInfo(artifact);
+  const officialSourceUrl = sourceInfo.sourceUrl;
 
   const relatedArtifacts = activeViewArtifacts.filter(
     (other) =>
@@ -197,7 +202,7 @@ export const ArtifactDetailPage: React.FC = () => {
 
   const handleDownloadOriginalImage = async () => {
     if (!currentImg?.originalImageId) return;
-    if (artifact.permissionStatus !== 'Đã được phép' || !currentImg.isPermittedForPublic) {
+    if (effectivePermission !== 'Đã được phép' || !currentImg.isPermittedForPublic) {
       return;
     }
     const rec = await getOriginalImageBlob(currentImg.originalImageId);
@@ -380,7 +385,7 @@ export const ArtifactDetailPage: React.FC = () => {
                   </div>
                 </div>
                 {!isPublicPreview &&
-                  artifact.permissionStatus === 'Đã được phép' &&
+                  effectivePermission === 'Đã được phép' &&
                   currentImg.isPermittedForPublic && (
                     <div className="no-print pt-1">
                       <button
@@ -399,21 +404,30 @@ export const ArtifactDetailPage: React.FC = () => {
             <div className="space-y-4">
               <ArtifactPlaceholder
                 className="aspect-[4/3] rounded-xl"
-                reason="Chưa xác minh quyền đăng lại ảnh — không sao chép ảnh từ trang bảo tàng khi chưa có văn bản cho phép"
+                reason={IMAGE_RIGHTS_UNVERIFIED_NOTICE}
               />
-              <div className="no-print p-4 rounded-xl bg-[#F8F4EC] border border-[#70452F]/15 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <span className="text-[#65564A]">
-                  Bạn có thể xem trực tiếp tư liệu và hình ảnh gốc tại trang chính thức của đơn vị lưu giữ:
-                </span>
-                <a
-                  href={officialSourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#52624B] text-white font-medium hover:bg-[#3F4D39]"
-                >
-                  <span>Mở trang nguồn chính thức</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
+              <div className="no-print p-4 rounded-xl bg-[#F8F4EC] border border-[#70452F]/15 space-y-2 text-xs">
+                <p className="font-medium text-[#231B15]">
+                  {IMAGE_RIGHTS_UNVERIFIED_NOTICE}
+                </p>
+                <div className="flex flex-wrap items-center justify-between gap-2 text-[#65564A]">
+                  <span>
+                    Đơn vị lưu giữ: <strong className="text-[#231B15]">{sourceInfo.custodian}</strong> · Mã nguồn:{' '}
+                    <strong className="font-mono text-[#70452F]">{sourceInfo.registrationNumber}</strong>
+                  </span>
+                  <a
+                    href={officialSourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#52624B] text-white font-medium hover:bg-[#3F4D39]"
+                  >
+                    <span>Xem ảnh tại nguồn chính thức</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+                <p className="font-mono text-[11px] text-[#52624B] break-all">
+                  URL tư liệu: {officialSourceUrl}
+                </p>
               </div>
             </div>
           )}
@@ -467,16 +481,53 @@ export const ArtifactDetailPage: React.FC = () => {
               </dd>
             </div>
             <div className="py-2.5 flex justify-between gap-4">
-              <dt className="text-[#65564A]">Người cho phép & Vai trò</dt>
+              <dt className="text-[#65564A]">Đơn vị lưu giữ & Mã nguồn</dt>
               <dd className="font-medium text-right">
-                {displayOrPlaceholder(artifact.permissionGrantedBy)} ({displayOrPlaceholder(artifact.permissionRole)})
+                {sourceInfo.custodian} ({sourceInfo.registrationNumber})
               </dd>
             </div>
             <div className="py-2.5 flex justify-between gap-4">
-              <dt className="text-[#65564A]">Quyền công bố & Phạm vi</dt>
-              <dd className="font-medium text-right">
-                {artifact.permissionStatus} — {displayOrPlaceholder(artifact.permissionScope)}
+              <dt className="text-[#65564A]">URL trang tư liệu</dt>
+              <dd className="text-right">
+                <a
+                  href={officialSourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-medium text-[#52624B] hover:underline break-all"
+                >
+                  {officialSourceUrl}
+                </a>
               </dd>
+            </div>
+            <div className="py-2.5 space-y-1">
+              <dt className="text-[#65564A]">Quyền sử dụng thông tin mô tả</dt>
+              <dd className="text-xs font-medium text-[#231B15] leading-relaxed">
+                {artifact.descriptionRightsNote || DESCRIPTION_RIGHTS_NOTICE}
+              </dd>
+            </div>
+            <div className="py-2.5 space-y-1">
+              <dt className="text-[#65564A]">Quyền đăng lại ảnh hoặc bản số</dt>
+              <dd className="text-xs font-semibold text-[#70452F] leading-relaxed">
+                {effectivePermission === 'Đã được phép'
+                  ? `Đã được phép (Phạm vi: ${artifact.permissionScope})`
+                  : IMAGE_RIGHTS_UNVERIFIED_NOTICE}
+              </dd>
+              {artifact.permissionGrantedBy?.trim() && (
+                <dd className="text-xs text-[#231B15]">
+                  Người/Đơn vị xác nhận: {artifact.permissionGrantedBy}
+                  {artifact.permissionDate ? ` · Ngày: ${artifact.permissionDate}` : ''}
+                </dd>
+              )}
+              {artifact.permissionEvidence?.trim() && (
+                <dd className="text-xs text-[#52624B]">
+                  Bằng chứng: {artifact.permissionEvidence}
+                </dd>
+              )}
+              {!artifact.permissionGrantedBy?.trim() && (
+                <dd className="text-xs text-[#65564A]">
+                  Người cho phép & ngày đồng ý: Chưa cập nhật (không tự điền khi chưa có bằng chứng)
+                </dd>
+              )}
             </div>
           </dl>
         </section>
@@ -489,6 +540,9 @@ export const ArtifactDetailPage: React.FC = () => {
             <h2 className="font-editorial text-2xl font-semibold text-[#231B15]">
               Mô tả đối chiếu & Lịch sử tiếp nhận
             </h2>
+            <p className="text-xs text-[#52624B] bg-[#F8F4EC] p-3 rounded-lg border border-[#70452F]/10">
+              {artifact.descriptionRightsNote || DESCRIPTION_RIGHTS_NOTICE}
+            </p>
             <p className="text-sm sm:text-base text-[#231B15] leading-relaxed">
               {displayOrPlaceholder(artifact.description)}
             </p>

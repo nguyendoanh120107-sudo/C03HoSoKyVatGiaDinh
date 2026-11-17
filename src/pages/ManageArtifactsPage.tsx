@@ -18,8 +18,10 @@ import { motion } from 'motion/react';
 import { useArchive } from '../context/ArchiveContext';
 import {
   ARTIFACT_CATEGORIES,
+  DESCRIPTION_RIGHTS_NOTICE,
   DISPLAYED_COPY_TYPES,
   DUBLIN_CORE_FIELDS,
+  IMAGE_RIGHTS_UNVERIFIED_NOTICE,
   ORIGINAL_CONDITIONS,
   PERMISSION_STATUSES,
   PHOTO_ANGLES,
@@ -32,7 +34,11 @@ import {
   FamilyArtifact,
   PhotoAngle,
 } from '../types/artifact';
-import { evaluateArtifactCompleteness } from '../utils/completeness';
+import {
+  evaluateArtifactCompleteness,
+  getEffectivePermissionStatus,
+  hasValidPermissionEvidence,
+} from '../utils/completeness';
 import {
   exportArtifactsToCsv,
   exportArtifactsToJson,
@@ -76,7 +82,10 @@ function createEmptyArtifact(
     permissionRole: '',
     permissionDate: '',
     permissionScope: '',
+    permissionEvidence: '',
     permissionStatus: 'Chưa xin phép',
+    descriptionRightsNote: DESCRIPTION_RIGHTS_NOTICE,
+    imageRightsStatus: IMAGE_RIGHTS_UNVERIFIED_NOTICE,
     restrictedContent: '',
     revocationDate: '',
     verificationStatus: 'Chưa kiểm chứng',
@@ -305,12 +314,44 @@ export const ManageArtifactsPage: React.FC = () => {
       return;
     }
 
+    if (
+      !asDraft &&
+      form.permissionStatus === 'Đã được phép' &&
+      !hasValidPermissionEvidence(form)
+    ) {
+      setFormError(
+        'Không được đánh dấu "Đã được phép" khi thiếu tên người/đơn vị cho phép, bằng chứng cấp phép, phạm vi sử dụng hoặc ngày xác nhận hợp lệ.'
+      );
+      return;
+    }
+
     setSaving(true);
     try {
+      const effectivePermStatus =
+        form.permissionStatus === 'Đã được phép' &&
+        !hasValidPermissionEvidence(form)
+          ? 'Chưa xin phép'
+          : form.permissionStatus;
+
       const toSave: FamilyArtifact = {
         ...form,
         id: form.identifier,
         registrationNumber: form.registrationNumber || form.identifier,
+        permissionStatus: effectivePermStatus,
+        descriptionRightsNote:
+          form.descriptionRightsNote?.trim() || DESCRIPTION_RIGHTS_NOTICE,
+        imageRightsStatus:
+          effectivePermStatus === 'Đã được phép' &&
+          hasValidPermissionEvidence(form)
+            ? `Đã xác nhận quyền sử dụng ảnh (${form.permissionScope})`
+            : IMAGE_RIGHTS_UNVERIFIED_NOTICE,
+        imageFiles:
+          effectivePermStatus === 'Đã được phép'
+            ? form.imageFiles
+            : form.imageFiles.map((img) => ({
+                ...img,
+                isPermittedForPublic: false,
+              })),
         isDraft: asDraft,
         isDemo: false,
         updatedAt: new Date().toISOString(),
@@ -1014,13 +1055,25 @@ export const ManageArtifactsPage: React.FC = () => {
 
               {/* Group 4: Rights & Restricted Content */}
               <div className="border-t border-[#70452F]/15 pt-6 space-y-4">
-                <h3 className="font-editorial text-xl font-semibold text-[#231B15]">
-                  Phần D. Quyền công bố & Đánh dấu phần không công bố
-                </h3>
+                <div>
+                  <h3 className="font-editorial text-xl font-semibold text-[#231B15]">
+                    Phần D. Quyền sử dụng mô tả, quyền đăng lại ảnh & phần không công bố
+                  </h3>
+                  <div className="mt-2 p-3.5 rounded-xl bg-[#F8F4EC] border border-[#70452F]/15 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-[#65564A]">
+                    <div>
+                      <strong className="text-[#231B15]">Quyền sử dụng thông tin mô tả:</strong>{' '}
+                      {form.descriptionRightsNote || DESCRIPTION_RIGHTS_NOTICE}
+                    </div>
+                    <div>
+                      <strong className="text-[#70452F]">Quyền đăng lại ảnh hoặc bản số:</strong>{' '}
+                      {IMAGE_RIGHTS_UNVERIFIED_NOTICE} Chỉ chọn “Đã được phép” sau khi nhập đủ bằng chứng, phạm vi và ngày xác nhận.
+                    </div>
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-[#231B15] mb-1">
-                      Trạng thái quyền công bố
+                      Trạng thái quyền đăng lại ảnh / bản số
                     </label>
                     <select
                       value={form.permissionStatus}
@@ -1041,7 +1094,7 @@ export const ManageArtifactsPage: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-[#231B15] mb-1">
-                      Người cho phép công bố
+                      Người / Đơn vị cho phép (không tự điền)
                     </label>
                     <input
                       type="text"
@@ -1049,7 +1102,7 @@ export const ManageArtifactsPage: React.FC = () => {
                       onChange={(e) =>
                         setForm({ ...form, permissionGrantedBy: e.target.value })
                       }
-                      placeholder="Họ tên người có quyền đồng ý"
+                      placeholder="Chỉ nhập khi có sự đồng ý thực tế"
                       className="w-full h-10 px-3 rounded-lg border border-[#70452F]/25 text-sm"
                     />
                   </div>
@@ -1063,13 +1116,27 @@ export const ManageArtifactsPage: React.FC = () => {
                       onChange={(e) =>
                         setForm({ ...form, permissionRole: e.target.value })
                       }
-                      placeholder="Ví dụ: Chủ sở hữu / Người đang giữ"
+                      placeholder="Ví dụ: Chủ sở hữu / Đơn vị lưu giữ"
                       className="w-full h-10 px-3 rounded-lg border border-[#70452F]/25 text-sm"
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-[#231B15] mb-1">
-                      Ngày đồng ý
+                      Bằng chứng cấp phép (Công văn / Email / Biên bản)
+                    </label>
+                    <input
+                      type="text"
+                      value={form.permissionEvidence ?? ''}
+                      onChange={(e) =>
+                        setForm({ ...form, permissionEvidence: e.target.value })
+                      }
+                      placeholder="Số văn bản, email xác nhận hoặc biên bản..."
+                      className="w-full h-10 px-3 rounded-lg border border-[#70452F]/25 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-[#231B15] mb-1">
+                      Ngày xác nhận đồng ý (không tự điền)
                     </label>
                     <input
                       type="date"
@@ -1082,7 +1149,7 @@ export const ManageArtifactsPage: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-[#231B15] mb-1">
-                      Phạm vi đồng ý
+                      Phạm vi đồng ý sử dụng
                     </label>
                     <input
                       type="text"
@@ -1090,11 +1157,11 @@ export const ManageArtifactsPage: React.FC = () => {
                       onChange={(e) =>
                         setForm({ ...form, permissionScope: e.target.value })
                       }
-                      placeholder="Ví dụ: Công bố ảnh mặt trước và câu chuyện tóm tắt"
+                      placeholder="Ví dụ: Công bố ảnh phi lợi nhuận kèm dẫn nguồn"
                       className="w-full h-10 px-3 rounded-lg border border-[#70452F]/25 text-sm"
                     />
                   </div>
-                  <div>
+                  <div className="md:col-span-3">
                     <label className="block text-xs font-semibold text-[#231B15] mb-1">
                       Phần nội dung bị hạn chế (không công khai)
                     </label>
@@ -1104,7 +1171,7 @@ export const ManageArtifactsPage: React.FC = () => {
                       onChange={(e) =>
                         setForm({ ...form, restrictedContent: e.target.value })
                       }
-                      placeholder="Ghi chú phần riêng tư không hiển thị công khai"
+                      placeholder="Ghi chú phần riêng tư hoặc hình ảnh nguồn không hiển thị công khai"
                       className="w-full h-10 px-3 rounded-lg border border-[#70452F]/25 text-sm"
                     />
                   </div>
@@ -1457,6 +1524,7 @@ export const ManageArtifactsPage: React.FC = () => {
               <tbody className="divide-y divide-[#70452F]/10">
                 {realArtifacts.map((item) => {
                   const rep = evaluateArtifactCompleteness(item);
+                  const effStatus = getEffectivePermissionStatus(item);
                   return (
                     <tr key={item.id} className="hover:bg-[#F8F4EC]/40">
                       <td className="py-3 px-4 font-mono text-xs text-[#70452F] whitespace-nowrap tabular-nums">
@@ -1472,12 +1540,12 @@ export const ManageArtifactsPage: React.FC = () => {
                       <td className="py-3 px-4 whitespace-nowrap">
                         <span
                           className={
-                            item.permissionStatus === 'Đã được phép'
+                            effStatus === 'Đã được phép'
                               ? 'text-[#52624B] font-medium'
                               : 'text-[#70452F]'
                           }
                         >
-                          {item.permissionStatus}
+                          {effStatus}
                         </span>
                       </td>
                       <td className="py-3 px-4 tabular-nums whitespace-nowrap text-[#65564A]">
